@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create — Pathway</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="create.css">
+</head>
+<body>
+<div class="scene create-scene">
+
+  <a class="back-link" href="../index.html">&larr; Pathway</a>
+
+  <main class="create-card">
+
+    <header class="create-header">
+      <p class="eyebrow">Create</p>
+      <h2>Fix and build your question bank</h2>
+      <p class="sub">Everything here is saved on this device. Use it to rewrite bad translations or add new questions from your own notes.</p>
+    </header>
+
+    <div class="tab-bar" role="tablist" aria-label="Creator mode">
+      <button class="tab-btn" data-tab="mine" role="tab">My questions</button>
+      <button class="tab-btn" data-tab="add" role="tab">Add / edit</button>
+      <button class="tab-btn" data-tab="notes" role="tab">From notes</button>
+    </div>
+
+    <!-- TAB: My questions -->
+    <section class="tab-panel" data-panel="mine">
+      <div class="panel-toolbar">
+        <input type="text" id="searchInput" placeholder="Search your questions…">
+        <select id="categoryFilter">
+          <option value="">All categories</option>
+        </select>
+      </div>
+      <div class="question-list" id="questionList"></div>
+      <div class="empty-state" id="bankEmpty" hidden>
+        <p>No questions yet.</p>
+        <p class="empty-sub">Add one in the "Add / edit" tab, or paste notes in "From notes" to get started.</p>
+      </div>
+      <div class="bank-actions">
+        <span id="bankCount">0 questions saved</span>
+        <div class="bank-buttons">
+          <button class="ghost-btn" id="exportBtn">Export JSON</button>
+          <button class="ghost-btn" id="importBtn">Import JSON</button>
+          <input type="file" id="importFile" accept="application/json" hidden>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: Add / edit -->
+    <section class="tab-panel" data-panel="add" hidden>
+      <form class="q-form" id="qForm">
+        <input type="hidden" id="editId">
+
+        <label class="field">
+          <span class="field-label">Category</span>
+          <input type="text" id="qCategory" placeholder="e.g. Road signs, Right of way, Penalties" required>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Question</span>
+          <textarea id="qText" rows="2" placeholder="Type the corrected question in clear English…" required></textarea>
+        </label>
+
+        <div class="options-grid">
+          <label class="field option-field">
+            <span class="field-label">Option A</span>
+            <input type="text" class="opt-input" data-idx="0" required>
+          </label>
+          <label class="field option-field">
+            <span class="field-label">Option B</span>
+            <input type="text" class="opt-input" data-idx="1" required>
+          </label>
+          <label class="field option-field">
+            <span class="field-label">Option C</span>
+            <input type="text" class="opt-input" data-idx="2" required>
+          </label>
+          <label class="field option-field">
+            <span class="field-label">Option D</span>
+            <input type="text" class="opt-input" data-idx="3" required>
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="field-label">Correct answer</span>
+          <div class="correct-picker" id="correctPicker">
+            <button type="button" class="correct-opt" data-idx="0">A</button>
+            <button type="button" class="correct-opt" data-idx="1">B</button>
+            <button type="button" class="correct-opt" data-idx="2">C</button>
+            <button type="button" class="correct-opt" data-idx="3">D</button>
+          </div>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Explanation <span class="optional-tag">optional, shown after answering</span></span>
+          <textarea id="qExplanation" rows="2" placeholder="Why is this the right answer?"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="button" class="ghost-btn" id="clearFormBtn">Clear</button>
+          <button type="submit" class="btn-primary" id="saveBtn">Save question</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- TAB: From notes -->
+    <section class="tab-panel" data-panel="notes" hidden>
+      <p class="notes-intro">Paste a chunk of notes or the original (badly translated) question text below. We'll split it into pieces you can quickly turn into questions one at a time — no need to write each one from scratch.</p>
+      <textarea id="rawNotes" rows="6" placeholder="Paste text here, one fact or question per line works best…"></textarea>
+      <button class="btn-primary" id="splitBtn" type="button">Split into pieces</button>
+
+      <div class="chunk-list" id="chunkList"></div>
+    </section>
+
+  </main>
+
+</div>
+
+<script src="create.js"></script>
+</body>
+</html>

@@ -1,28 +1,13 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { ChevronRight } from "lucide-react";
 
 type Step = "welcome" | "intent" | "learn-detail" | "focus-detail" | "plan-detail" | "build-detail" | "redirecting";
 
-const trailPaths: Record<string, string> = {
-  learn: "M160,420 C160,360 110,330 90,260",
-  focus: "M160,420 C160,360 160,330 160,250",
-  plan: "M160,420 C160,360 190,330 200,260",
-  build: "M160,420 C160,360 225,330 240,270",
-};
-
 export default function Home() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("welcome");
   const [intent, setIntent] = useState<string | null>(null);
-  const [pathLength, setPathLength] = useState(0);
-  const pathRef = useRef<SVGPathElement>(null);
-  
-  useEffect(() => {
-    if (pathRef.current) {
-      setPathLength(pathRef.current.getTotalLength());
-    }
-  }, [intent, step]);
 
   const handleIntent = (selectedIntent: "learn" | "focus" | "plan" | "build") => {
     setIntent(selectedIntent);
@@ -46,35 +31,6 @@ export default function Home() {
   return (
     <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-paper relative overflow-hidden px-4">
       
-      {/* SVG Background Trail */}
-      <div className="absolute inset-0 z-0 pointer-events-none flex justify-center items-end" aria-hidden="true">
-        <svg width="320" height="420" viewBox="0 0 320 420" className="opacity-60 mb-24">
-          {/* Base trunk — hidden on welcome step */}
-          {step !== "welcome" && (
-            <path 
-              d="M160,420 L160,360" 
-              fill="none" 
-              stroke="var(--color-clay)"
-              strokeWidth="3" 
-              strokeLinecap="round"
-            />
-          )}
-          {/* Active branch */}
-          {intent && (
-            <path
-              ref={pathRef}
-              d={trailPaths[intent]}
-              fill="none"
-              stroke="var(--color-clay)"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeDasharray={pathLength}
-              strokeDashoffset={step === "redirecting" || step.endsWith("-detail") ? 0 : pathLength}
-              className="transition-all duration-1000 ease-out"
-            />
-          )}
-        </svg>
-      </div>
 
       <div className="card-container flex flex-col items-center text-center">
         {step === "welcome" && (

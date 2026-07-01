@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
 import { useSearch } from "wouter";
+import Footer from "../components/Footer";
 
 const STORAGE_KEY = "pathway:questionBank";
 
@@ -890,6 +891,7 @@ export default function Create() {
           <NotesTab onUseChunk={handleUseChunk} />
         )}
       </div>
+      <Footer />
     </div>
   );
 }

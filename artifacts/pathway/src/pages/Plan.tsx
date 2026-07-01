@@ -132,7 +132,7 @@ export default function Plan() {
 
   return (
     <div
-      className="min-h-[100dvh] w-full flex flex-col items-center px-4"
+      className="min-h-[100dvh] w-full flex flex-col items-center px-4 relative"
       style={{ background: "hsl(var(--paper))", paddingTop: 90 }}
     >
       <button

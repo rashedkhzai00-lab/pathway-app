@@ -144,6 +144,7 @@ export default function Study() {
   return (
     <div
       style={{
+        position: "relative",
         minHeight: "100dvh",
         width: "100%",
         background: "hsl(var(--paper))",

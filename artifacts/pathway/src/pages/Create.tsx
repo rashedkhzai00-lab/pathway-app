@@ -811,6 +811,7 @@ export default function Create() {
   return (
     <div
       style={{
+        position: "relative",
         minHeight: "100dvh",
         width: "100%",
         background: "hsl(var(--paper))",

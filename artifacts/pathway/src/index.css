@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@100..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -51,8 +50,8 @@
   --color-sage: hsl(var(--sage));
   --color-dusty-blue: hsl(var(--dusty-blue));
 
-  --font-sans: 'Inter', sans-serif;
-  --font-serif: 'Fraunces', serif;
+  --font-sans: 'Verdana', Geneva, sans-serif;
+  --font-serif: 'Verdana', Geneva, sans-serif;
 
   --text-base: 17px;
   --text-base--line-height: calc(1.5 / 1);
@@ -147,10 +146,7 @@
     @apply font-serif;
   }
   h1, h2 {
-    font-weight: 500;
-  }
-  h2 {
-    font-style: italic;
+    font-weight: 700;
   }
 }
 

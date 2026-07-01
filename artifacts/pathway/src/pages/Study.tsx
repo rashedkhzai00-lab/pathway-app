@@ -253,7 +253,7 @@ function HomeView({
             >
               <span
                 style={{
-                  fontFamily: "Fraunces, serif",
+                  fontFamily: "Verdana, Geneva, sans-serif",
                   fontWeight: 500,
                   fontSize: 26,
                   color: "hsl(var(--ink))",
@@ -303,7 +303,7 @@ function HomeView({
               border: "none",
               borderRadius: 999,
               padding: "9px 18px",
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "Verdana, Geneva, sans-serif",
               fontWeight: 600,
               fontSize: 13,
               cursor: "pointer",
@@ -374,7 +374,7 @@ function HomeView({
               color: "hsl(var(--paper-raised))",
               borderRadius: 999,
               padding: "11px 22px",
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "Verdana, Geneva, sans-serif",
               fontSize: 15,
               fontWeight: 600,
               textDecoration: "none",
@@ -428,7 +428,7 @@ function ActionCard({
     >
       <span
         style={{
-          fontFamily: "Inter, sans-serif",
+          fontFamily: "Verdana, Geneva, sans-serif",
           fontWeight: 600,
           fontSize: 15.5,
           color: highlight ? "#A8502C" : "hsl(var(--ink))",
@@ -468,7 +468,7 @@ function CategoryView({
           fontWeight: 500,
           cursor: "pointer",
           padding: "4px 0",
-          fontFamily: "Inter, sans-serif",
+          fontFamily: "Verdana, Geneva, sans-serif",
         }}
       >
         ← Back
@@ -515,7 +515,7 @@ function CategoryItem({
         borderRadius: 14,
         padding: "14px 18px",
         cursor: "pointer",
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "Verdana, Geneva, sans-serif",
         fontSize: 15,
         fontWeight: 500,
         color: "hsl(var(--ink))",
@@ -678,7 +678,7 @@ function SessionView({
             fontWeight: 500,
             cursor: "pointer",
             padding: "4px 0",
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Verdana, Geneva, sans-serif",
           }}
         >
           ← Exit
@@ -686,7 +686,7 @@ function SessionView({
         {currentSession.timeLimitSeconds && timeLeft !== null && (
           <span
             style={{
-              fontFamily: "Fraunces, serif",
+              fontFamily: "Verdana, Geneva, sans-serif",
               fontWeight: 500,
               fontSize: 18,
               color: timeLeft < 60 ? "hsl(var(--clay))" : "hsl(var(--ink-soft))",
@@ -785,7 +785,7 @@ function SessionView({
                 }`,
                 borderRadius: 14,
                 padding: "15px 18px",
-                fontFamily: "Inter, sans-serif",
+                fontFamily: "Verdana, Geneva, sans-serif",
                 fontSize: 15,
                 color: "hsl(var(--ink))",
                 cursor: answered ? "default" : "pointer",
@@ -862,7 +862,7 @@ function SessionView({
             border: "none",
             borderRadius: 999,
             padding: "13px 22px",
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Verdana, Geneva, sans-serif",
             fontSize: 15,
             fontWeight: 600,
             cursor: "pointer",
@@ -901,7 +901,7 @@ function ResultsView({
       <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
         <span
           style={{
-            fontFamily: "Fraunces, serif",
+            fontFamily: "Verdana, Geneva, sans-serif",
             fontWeight: 500,
             fontSize: 44,
             color: "hsl(var(--ink))",
@@ -931,7 +931,7 @@ function ResultsView({
               border: "none",
               borderRadius: 999,
               padding: "11px 22px",
-              fontFamily: "Inter, sans-serif",
+              fontFamily: "Verdana, Geneva, sans-serif",
               fontSize: 15,
               fontWeight: 600,
               cursor: "pointer",
@@ -963,7 +963,7 @@ function GhostButton({
         border: `1.5px solid ${hov ? "hsl(var(--ink))" : "hsl(var(--line))"}`,
         borderRadius: 999,
         padding: "9px 16px",
-        fontFamily: "Inter, sans-serif",
+        fontFamily: "Verdana, Geneva, sans-serif",
         fontSize: 13,
         fontWeight: 600,
         color: hov ? "hsl(var(--ink))" : "hsl(var(--ink-soft))",

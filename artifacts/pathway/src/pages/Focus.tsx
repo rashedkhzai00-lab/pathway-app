@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearch, useLocation } from "wouter";
 
 const CIRCUMFERENCE = 2 * Math.PI * 108;
-const BREAK_MAP: Record<number, number> = { 15: 5, 25: 5, 50: 10 };
+const BREAK_MAP: Record<number, number> = { 5: 1, 15: 5, 25: 5, 50: 10 };
 const STREAK_KEY = "pathway:focusStreak";
 
 function todayKey() {
@@ -59,7 +59,7 @@ export default function Focus() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const rawLen = parseInt(params.get("len") || "25", 10);
-  const defaultLen = [15, 25, 50].includes(rawLen) ? rawLen : 25;
+  const defaultLen = [5, 15, 25, 50].includes(rawLen) ? rawLen : 25;
 
   const [focusMinutes, setFocusMinutes] = useState(defaultLen);
   const [phase, setPhase] = useState<"work" | "break">("work");
@@ -295,7 +295,7 @@ export default function Focus() {
         >
           <span className="text-xs text-ink-soft font-semibold tracking-widest uppercase">Focus length</span>
           <div className="flex gap-2" data-testid="length-options">
-            {[15, 25, 50].map((min) => (
+            {[5, 15, 25, 50].map((min) => (
               <button
                 key={min}
                 className="px-4 py-2 rounded-full text-sm font-semibold border-[1.5px] transition-all duration-200"

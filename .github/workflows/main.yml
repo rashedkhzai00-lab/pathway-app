@@ -34,6 +34,6 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: artifacts/mockup-sandbox/dist
+          path: artifacts/pathway/dist/public
 
       - uses: actions/deploy-pages@v4

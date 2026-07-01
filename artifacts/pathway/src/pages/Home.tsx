@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ChevronRight, Palette, Check } from "lucide-react";
 import { useTheme, type Theme } from "../hooks/useTheme";
+import Footer from "../components/Footer";
 
 const themeOptions: { id: Theme; label: string; swatch: string }[] = [
   { id: "light", label: "Light", swatch: "hsl(40 33% 95%)" },
@@ -259,6 +260,7 @@ export default function Home() {
         </button>
       </div>
 
+      <Footer />
     </div>
   );
 }

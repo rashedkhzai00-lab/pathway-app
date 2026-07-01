@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useSearch } from "wouter";
+import Footer from "../components/Footer";
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -561,6 +562,7 @@ export default function Plan() {
           </>
         )}
       </div>
+      <Footer />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useSearch, useLocation } from "wouter";
+import Footer from "../components/Footer";
 
 const CIRCUMFERENCE = 2 * Math.PI * 108;
 const BREAK_MAP: Record<number, number> = { 5: 1, 15: 5, 25: 5, 50: 10 };
@@ -385,6 +386,7 @@ export default function Focus() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

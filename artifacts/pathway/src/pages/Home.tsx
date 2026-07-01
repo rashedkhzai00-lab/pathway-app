@@ -49,15 +49,16 @@ export default function Home() {
       {/* SVG Background Trail */}
       <div className="absolute inset-0 z-0 pointer-events-none flex justify-center items-end" aria-hidden="true">
         <svg width="320" height="420" viewBox="0 0 320 420" className="opacity-60 mb-24">
-          {/* Base trunk */}
-          <path 
-            d="M160,420 L160,360" 
-            fill="none" 
-            stroke={step !== "welcome" ? "var(--color-clay)" : "var(--color-line)"} 
-            strokeWidth="3" 
-            strokeLinecap="round"
-            className="transition-colors duration-700"
-          />
+          {/* Base trunk — hidden on welcome step */}
+          {step !== "welcome" && (
+            <path 
+              d="M160,420 L160,360" 
+              fill="none" 
+              stroke="var(--color-clay)"
+              strokeWidth="3" 
+              strokeLinecap="round"
+            />
+          )}
           {/* Active branch */}
           {intent && (
             <path

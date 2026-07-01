@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { Timer, BookOpen, CalendarDays, PenLine } from "lucide-react";
+import { useTheme, type Theme } from "../hooks/useTheme";
 
 const modules = [
   {
@@ -44,7 +45,15 @@ const modules = [
   },
 ];
 
+const themes: { id: Theme; label: string; swatch: string }[] = [
+  { id: "light", label: "Light", swatch: "hsl(40 33% 95%)" },
+  { id: "dark",  label: "Dark",  swatch: "hsl(220 13% 13%)" },
+  { id: "warm",  label: "Warm",  swatch: "hsl(30 42% 90%)" },
+];
+
 export default function Hub() {
+  const { theme, setTheme } = useTheme();
+
   return (
     <div className="min-h-[100dvh] w-full bg-paper px-4 py-16 flex flex-col items-center">
       <div className="w-full max-w-[520px] flex flex-col gap-8">
@@ -110,6 +119,62 @@ export default function Hub() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Theme picker */}
+        <div className="card-container flex flex-col gap-3">
+          <p className="text-xs font-semibold tracking-widest uppercase text-ink-soft">
+            Theme
+          </p>
+          <div className="flex gap-2">
+            {themes.map((t) => {
+              const active = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTheme(t.id)}
+                  aria-pressed={active}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "12px 8px",
+                    borderRadius: 14,
+                    border: active
+                      ? "2px solid hsl(var(--clay))"
+                      : "2px solid hsl(var(--line))",
+                    background: active ? "hsl(var(--clay-soft))" : "transparent",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    fontFamily: "Verdana, Geneva, sans-serif",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      background: t.swatch,
+                      border: "1.5px solid hsl(var(--line))",
+                      display: "block",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: active ? 700 : 500,
+                      color: active ? "hsl(var(--clay))" : "hsl(var(--ink-soft))",
+                    }}
+                  >
+                    {t.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Back to onboarding */}

@@ -10,6 +10,7 @@ import Study from "./pages/Study";
 import Plan from "./pages/Plan";
 import Create from "./pages/Create";
 import Hub from "./pages/Hub";
+import { useTheme } from "./hooks/useTheme";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function Router() {
 }
 
 function App() {
+  useTheme();
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

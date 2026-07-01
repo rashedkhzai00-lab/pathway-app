@@ -1,6 +1,13 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Palette, Check } from "lucide-react";
+import { useTheme, type Theme } from "../hooks/useTheme";
+
+const themeOptions: { id: Theme; label: string; swatch: string }[] = [
+  { id: "light", label: "Light", swatch: "hsl(40 33% 95%)" },
+  { id: "dark",  label: "Dark",  swatch: "hsl(220 13% 13%)" },
+  { id: "warm",  label: "Warm",  swatch: "hsl(30 42% 90%)" },
+];
 
 type Step = "welcome" | "intent" | "learn-detail" | "focus-detail" | "plan-detail" | "build-detail" | "redirecting";
 
@@ -8,6 +15,20 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const [step, setStep] = useState<Step>("welcome");
   const [intent, setIntent] = useState<string | null>(null);
+  const { theme, setTheme } = useTheme();
+  const [themeOpen, setThemeOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!themeOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setThemeOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [themeOpen]);
 
   const handleIntent = (selectedIntent: "learn" | "focus" | "plan" | "build") => {
     setIntent(selectedIntent);
@@ -30,7 +51,87 @@ export default function Home() {
 
   return (
     <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-paper relative overflow-hidden px-4">
-      
+
+      {/* Theme dropdown — top-right corner */}
+      <div ref={dropdownRef} style={{ position: "absolute", top: 16, right: 16, zIndex: 50 }}>
+        <button
+          onClick={() => setThemeOpen((o) => !o)}
+          aria-label="Change theme"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "7px 13px",
+            borderRadius: 999,
+            border: "1.5px solid hsl(var(--line))",
+            background: "hsl(var(--paper-raised))",
+            cursor: "pointer",
+            fontSize: 13,
+            fontWeight: 600,
+            color: "hsl(var(--ink-soft))",
+            fontFamily: "Verdana, Geneva, sans-serif",
+            transition: "all 0.15s ease",
+          }}
+        >
+          <Palette size={14} />
+          {themeOptions.find((t) => t.id === theme)?.label ?? "Light"}
+        </button>
+
+        {themeOpen && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              right: 0,
+              background: "hsl(var(--paper-raised))",
+              border: "1.5px solid hsl(var(--line))",
+              borderRadius: 14,
+              boxShadow: "var(--shadow-warm-2)",
+              overflow: "hidden",
+              minWidth: 140,
+            }}
+          >
+            {themeOptions.map((t) => {
+              const active = theme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => { setTheme(t.id); setThemeOpen(false); }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "none",
+                    background: active ? "hsl(var(--clay-soft))" : "transparent",
+                    cursor: "pointer",
+                    fontFamily: "Verdana, Geneva, sans-serif",
+                    fontSize: 13,
+                    fontWeight: active ? 700 : 500,
+                    color: active ? "hsl(var(--clay))" : "hsl(var(--ink))",
+                    textAlign: "left",
+                    transition: "background 0.1s",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 14,
+                      height: 14,
+                      borderRadius: "50%",
+                      background: t.swatch,
+                      border: "1.5px solid hsl(var(--line))",
+                      flexShrink: 0,
+                    }}
+                  />
+                  {t.label}
+                  {active && <Check size={12} style={{ marginLeft: "auto", color: "hsl(var(--clay))" }} />}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       <div className="card-container flex flex-col items-center text-center">
         {step === "welcome" && (

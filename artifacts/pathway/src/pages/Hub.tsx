@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Timer, BookOpen, CalendarDays, PenLine } from "lucide-react";
 import { useTheme, type Theme } from "../hooks/useTheme";
+import Footer from "../components/Footer";
 
 const modules = [
   {
@@ -187,6 +188,7 @@ export default function Hub() {
             Back to ADHDrive
           </Link>
         </div>
+        <Footer />
       </div>
     </div>
   );

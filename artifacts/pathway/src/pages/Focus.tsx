@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useSearch } from "wouter";
+import { useSearch, useLocation } from "wouter";
 
 const CIRCUMFERENCE = 2 * Math.PI * 108;
 const BREAK_MAP: Record<number, number> = { 15: 5, 25: 5, 50: 10 };
@@ -68,6 +68,8 @@ export default function Focus() {
   const [remainingSeconds, setRemainingSeconds] = useState(defaultLen * 60);
   const [running, setRunning] = useState(false);
   const [streak, setStreak] = useState(getStreakCount);
+  const [showStudyToast, setShowStudyToast] = useState(false);
+  const [, navigate] = useLocation();
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const endTimestampRef = useRef<number>(0);
@@ -103,6 +105,7 @@ export default function Focus() {
       setPhase("break");
       setTotalSeconds(breakSec);
       setRemainingSeconds(breakSec);
+      setShowStudyToast(true);
     } else {
       const newRound = currentRound + 1;
       setRound(newRound);
@@ -314,6 +317,73 @@ export default function Focus() {
           {streak === 1 ? "1 session completed today" : `${streak} sessions completed today`}
         </p>
       </div>
+
+      {/* Study prompt toast */}
+      {showStudyToast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 28,
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 100,
+            background: "hsl(var(--paper-raised))",
+            border: "1.5px solid hsl(var(--line))",
+            borderRadius: 18,
+            boxShadow: "var(--shadow-warm-2)",
+            padding: "18px 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+            minWidth: 280,
+            maxWidth: 340,
+            animation: "slideUp 0.25s ease-out",
+            fontFamily: "Verdana, Geneva, sans-serif",
+          }}
+          data-testid="study-toast"
+        >
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "hsl(var(--ink))", lineHeight: 1.4 }}>
+            Nice work! Want to log a study session?
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={() => { setShowStudyToast(false); navigate("/study"); }}
+              style={{
+                flex: 1,
+                padding: "9px 14px",
+                borderRadius: 999,
+                border: "none",
+                background: "hsl(var(--ink))",
+                color: "hsl(var(--paper-raised))",
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontFamily: "Verdana, Geneva, sans-serif",
+              }}
+              data-testid="toast-yes"
+            >
+              Yes, open Study
+            </button>
+            <button
+              onClick={() => setShowStudyToast(false)}
+              style={{
+                padding: "9px 14px",
+                borderRadius: 999,
+                border: "1.5px solid hsl(var(--line))",
+                background: "transparent",
+                color: "hsl(var(--ink-soft))",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                fontFamily: "Verdana, Geneva, sans-serif",
+              }}
+              data-testid="toast-dismiss"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

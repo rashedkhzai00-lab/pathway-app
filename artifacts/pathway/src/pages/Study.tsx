@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
+import Footer from "../components/Footer";
 
 // ─── Storage keys & types ────────────────────────────────────────────────────
 
@@ -194,6 +195,7 @@ export default function Study() {
           }}
         />
       )}
+      <Footer />
     </div>
   );
 }

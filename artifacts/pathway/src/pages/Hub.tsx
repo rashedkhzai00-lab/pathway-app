@@ -18,7 +18,7 @@ const modules = [
     description: "Category practice and mock exam mode for driving theory.",
     icon: BookOpen,
     href: "/study",
-    status: "coming-soon" as const,
+    status: "ready" as const,
     accentVar: "--color-clay",
     bgVar: "hsl(18 52% 81% / 0.25)",
   },
@@ -28,7 +28,7 @@ const modules = [
     description: "Daily and weekly overview of your tasks and sessions.",
     icon: CalendarDays,
     href: "/plan",
-    status: "coming-soon" as const,
+    status: "ready" as const,
     accentVar: "--color-sage",
     bgVar: "hsl(92 11% 49% / 0.1)",
   },
@@ -38,7 +38,7 @@ const modules = [
     description: "Build and fix study questions from your notes.",
     icon: PenLine,
     href: "/create",
-    status: "coming-soon" as const,
+    status: "ready" as const,
     accentVar: "--color-dusty-blue",
     bgVar: "hsl(210 25% 48% / 0.1)",
   },
@@ -51,7 +51,7 @@ export default function Hub() {
         {/* Header */}
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold tracking-widest uppercase text-clay" data-testid="text-eyebrow">
-            Pathway
+            ADHDrive
           </p>
           <h1 className="text-4xl text-ink leading-tight" data-testid="text-heading">
             Everything
@@ -119,7 +119,7 @@ export default function Hub() {
             className="text-ink-soft hover:text-ink text-sm font-medium transition-colors"
             data-testid="link-back-to-pathway"
           >
-            Back to Pathway
+            Back to ADHDrive
           </Link>
         </div>
       </div>

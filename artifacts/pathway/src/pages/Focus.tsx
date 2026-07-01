@@ -87,8 +87,8 @@ export default function Focus() {
 
   useEffect(() => {
     const label = running
-      ? `${formatTime(remainingSeconds)} · ${phase === "work" ? "Focusing" : "Break"} — Pathway`
-      : "Focus — Pathway";
+      ? `${formatTime(remainingSeconds)} · ${phase === "work" ? "Focusing" : "Break"} — ADHDrive`
+      : "Focus — ADHDrive";
     document.title = label;
   }, [running, remainingSeconds, phase]);
 
@@ -188,7 +188,7 @@ export default function Focus() {
   }, [running, phase]);
 
   useEffect(() => {
-    return () => { clearTimer(); document.title = "Pathway"; };
+    return () => { clearTimer(); document.title = "ADHDrive"; };
   }, [clearTimer]);
 
   const strokeColor = phaseIsWork ? "var(--color-clay)" : "var(--color-sage)";
@@ -201,7 +201,7 @@ export default function Focus() {
         data-testid="link-back"
       >
         <ArrowLeft className="w-4 h-4" />
-        Pathway
+        ADHDrive
       </Link>
 
       <div

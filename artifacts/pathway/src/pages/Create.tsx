@@ -829,7 +829,7 @@ export default function Create() {
         className="absolute top-6 left-6 text-ink-soft hover:text-ink text-sm font-medium flex items-center gap-1.5 transition-colors px-3 py-2 rounded-xl hover:bg-paper-raised"
       >
         <ArrowLeft className="w-4 h-4" />
-        Pathway
+        ADHDrive
       </Link>
 
       <div

@@ -1,44 +1,49 @@
-# [Project name]
+# ADHDrive
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An ADHD-friendly driving theory study companion with four modules: Focus (Pomodoro timer), Study (quiz engine), Plan (task manager), and Create (question bank builder).
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/pathway run dev` — run the ADHDrive app (port 25088)
+- `pnpm --filter @workspace/pathway run typecheck` — typecheck the app
+- Workflow name: `artifacts/pathway: web`
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- React 19 + Vite, wouter routing, Tailwind CSS v4
+- All state in localStorage — no backend, no database
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/pathway/src/pages/` — all four module pages + Home + Hub
+- `artifacts/pathway/src/index.css` — full design system (palette, utilities)
+- `artifacts/pathway/src/App.tsx` — wouter router
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- All data is localStorage-only; no API or database needed
+- Focus timer uses `Date.now()` + `endTimestampRef` for drift-free countdown
+- Study module reads from `pathway:questionBank` written by Create module
+- Session state (`pathway:activeSession`) persists mid-quiz for resume support
+- Weak spots (`pathway:weakSpots`) track per-question miss counts
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- **Focus** — Pomodoro timer (15/25/50 min), work/break cycles, daily streak
+- **Study** — Quiz engine with 4 modes: drill weak spots, quick practice, by category, timed mock exam
+- **Plan** — Task manager with today/week toggle, date+time scheduling, localStorage persistence
+- **Create** — Question bank builder: add/edit form, from-notes splitter, export/import JSON
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- App name: ADHDrive
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Workflow must be restarted after code changes: `restartWorkflow({ workflowName: "artifacts/pathway: web" })`
+- `pnpm run build` needs `PORT`/`BASE_PATH` env vars; use `typecheck` for verification instead
+- Do not add this artifact to root `tsconfig.json` references (leaf package)
 
 ## Pointers
 

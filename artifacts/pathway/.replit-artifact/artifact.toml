@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Pathway"
+title = "ADHDrive"
 version = "1.0.0"
 id = "artifacts/pathway"
 router = "path"

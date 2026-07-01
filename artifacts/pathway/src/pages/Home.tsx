@@ -78,7 +78,7 @@ export default function Home() {
       <div className="card-container flex flex-col items-center text-center">
         {step === "welcome" && (
           <div className="step-enter flex flex-col items-center w-full">
-            <span className="text-ink-soft text-sm font-medium tracking-wide uppercase mb-6" data-testid="text-eyebrow">Pathway</span>
+            <span className="text-ink-soft text-sm font-medium tracking-wide uppercase mb-6" data-testid="text-eyebrow">ADHDrive</span>
             <h1 className="text-4xl text-ink mb-4" data-testid="text-heading">What do you need right now?</h1>
             <p className="text-ink-soft mb-10 leading-relaxed" data-testid="text-subtitle">Take a breath. Choose a path for this session.</p>
             <button 

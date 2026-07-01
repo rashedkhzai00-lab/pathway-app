@@ -164,6 +164,7 @@ export default function Focus() {
             setPhase("break");
             setTotalSeconds(breakSec);
             setRemainingSeconds(breakSec);
+            setShowStudyToast(true);
           } else {
             const newRound = r + 1;
             setRound(newRound);

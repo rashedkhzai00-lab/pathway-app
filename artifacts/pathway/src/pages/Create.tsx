@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
-import { Link, useSearch } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { useSearch } from "wouter";
 
 const STORAGE_KEY = "pathway:questionBank";
 
@@ -824,13 +823,13 @@ export default function Create() {
         paddingRight: 16,
       }}
     >
-      <Link
-        href="/"
+      <button
+        onClick={() => window.history.back()}
         className="absolute top-6 left-6 text-ink-soft hover:text-ink text-sm font-medium flex items-center gap-1.5 transition-colors px-3 py-2 rounded-xl hover:bg-paper-raised"
+        style={{ background: "none", border: "none", cursor: "pointer" }}
       >
-        <ArrowLeft className="w-4 h-4" />
-        ADHDrive
-      </Link>
+        ← Back
+      </button>
 
       <div
         style={{

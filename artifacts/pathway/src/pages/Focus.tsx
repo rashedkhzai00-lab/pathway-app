@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useSearch, Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { useSearch } from "wouter";
 
 const CIRCUMFERENCE = 2 * Math.PI * 108;
 const BREAK_MAP: Record<number, number> = { 15: 5, 25: 5, 50: 10 };
@@ -195,14 +194,14 @@ export default function Focus() {
 
   return (
     <div className="min-h-[100dvh] w-full bg-paper flex flex-col items-center justify-center px-4 py-12 relative">
-      <Link
-        href="/"
+      <button
+        onClick={() => window.history.back()}
         className="absolute top-6 left-6 text-ink-soft hover:text-ink text-sm font-medium flex items-center gap-1.5 transition-colors px-3 py-2 rounded-xl hover:bg-paper-raised"
         data-testid="link-back"
+        style={{ background: "none", border: "none", cursor: "pointer" }}
       >
-        <ArrowLeft className="w-4 h-4" />
-        ADHDrive
-      </Link>
+        ← Back
+      </button>
 
       <div
         className="card-container flex flex-col items-center gap-6 text-center"

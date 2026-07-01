@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
-import { ArrowLeft } from "lucide-react";
 
 // ─── Storage keys & types ────────────────────────────────────────────────────
 
@@ -157,13 +156,13 @@ export default function Study() {
         paddingRight: 16,
       }}
     >
-      <Link
-        href="/"
+      <button
+        onClick={() => window.history.back()}
         className="absolute top-6 left-6 text-ink-soft hover:text-ink text-sm font-medium flex items-center gap-1.5 transition-colors px-3 py-2 rounded-xl hover:bg-paper-raised"
+        style={{ background: "none", border: "none", cursor: "pointer" }}
       >
-        <ArrowLeft className="w-4 h-4" />
-        ADHDrive
-      </Link>
+        ← Back
+      </button>
 
       {view === "home" && (
         <HomeView

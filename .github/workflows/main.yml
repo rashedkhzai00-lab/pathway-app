@@ -35,6 +35,9 @@ jobs:
       - name: Copy index.html as 404.html for SPA routing
         run: cp artifacts/pathway/dist/public/index.html artifacts/pathway/dist/public/404.html
 
+      - name: Write CNAME for custom domain
+        run: echo "adhdrive.app" > artifacts/pathway/dist/public/CNAME
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

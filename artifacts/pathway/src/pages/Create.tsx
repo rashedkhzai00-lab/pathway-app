@@ -872,10 +872,10 @@ export default function Create() {
               fontStyle: "normal",
             }}
           >
-            Fix and build your question bank
+            Fix and build your study bank
           </h2>
           <p style={{ marginTop: 8, fontSize: 14, color: "hsl(var(--ink-soft))", lineHeight: 1.5 }}>
-            Everything here is saved on this device. Use it to rewrite bad translations or add new questions from your own notes.
+            Everything here is saved on this device. Use it to build flashcard sets or add new questions from your own notes.
           </p>
         </div>
 

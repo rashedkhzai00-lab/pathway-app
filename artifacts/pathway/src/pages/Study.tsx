@@ -228,7 +228,7 @@ function HomeView({
       <div>
         <p style={eyebrow}>Study</p>
         <h2 style={{ ...h2Style, fontSize: "1.75rem", marginTop: 6 }}>
-          Driving theory practice
+          Study & Notes
         </h2>
       </div>
 
@@ -364,9 +364,9 @@ function HomeView({
             gap: 6,
           }}
         >
-          <p style={{ margin: "2px 0" }}>Your question bank is empty.</p>
+          <p style={{ margin: "2px 0" }}>Your study bank is empty.</p>
           <p style={{ margin: "2px 0", fontSize: 13.5, maxWidth: 340 }}>
-            Add or fix questions in the Create module first, then come back here to practice.
+            Add notes or flashcards in the Create module first, then come back here to practice.
           </p>
           <Link
             href="/create"

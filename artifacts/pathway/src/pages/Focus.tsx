@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 const CIRCUMFERENCE = 2 * Math.PI * 108;
 const BREAK_MAP: Record<number, number> = { 5: 1, 15: 5, 25: 5, 50: 10 };
 const STREAK_KEY = "pathway:focusStreak";
+const FOCUS_TIME_KEY = "pathway:focusDailyMinutes";
+const WATER_LOG_KEY = "pathway:waterLog";
 
 function todayKey() {
   const d = new Date();
@@ -29,6 +31,27 @@ function incrementStreak(): number {
   raw[key] = (raw[key] || 0) + 1;
   localStorage.setItem(STREAK_KEY, JSON.stringify(raw));
   return raw[key];
+}
+
+function addFocusMinutes(min: number): number {
+  let raw: Record<string, number> = {};
+  try {
+    raw = JSON.parse(localStorage.getItem(FOCUS_TIME_KEY) || "{}");
+  } catch {}
+  const key = todayKey();
+  raw[key] = (raw[key] || 0) + min;
+  localStorage.setItem(FOCUS_TIME_KEY, JSON.stringify(raw));
+  return raw[key];
+}
+
+function logWaterGlass(): void {
+  let raw: Record<string, number> = {};
+  try {
+    raw = JSON.parse(localStorage.getItem(WATER_LOG_KEY) || "{}");
+  } catch {}
+  const key = todayKey();
+  raw[key] = (raw[key] || 0) + 1;
+  localStorage.setItem(WATER_LOG_KEY, JSON.stringify(raw));
 }
 
 function formatTime(sec: number): string {
@@ -70,6 +93,7 @@ export default function Focus() {
   const [running, setRunning] = useState(false);
   const [streak, setStreak] = useState(getStreakCount);
   const [showStudyToast, setShowStudyToast] = useState(false);
+  const [showWaterToast, setShowWaterToast] = useState(false);
   const [, navigate] = useLocation();
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -102,11 +126,13 @@ export default function Focus() {
     if (currentPhase === "work") {
       const newCount = incrementStreak();
       setStreak(newCount);
+      const newDailyMin = addFocusMinutes(currentFocusMin);
       const breakSec = (BREAK_MAP[currentFocusMin] || 5) * 60;
       setPhase("break");
       setTotalSeconds(breakSec);
       setRemainingSeconds(breakSec);
       setShowStudyToast(true);
+      if (newDailyMin >= 60) setShowWaterToast(true);
     } else {
       const newRound = currentRound + 1;
       setRound(newRound);
@@ -320,8 +346,8 @@ export default function Focus() {
         </p>
       </div>
 
-      {/* Study prompt toast */}
-      {showStudyToast && (
+      {/* Toast stack — anchored to bottom, grows upward */}
+      {(showStudyToast || showWaterToast) && (
         <div
           style={{
             position: "fixed",
@@ -329,61 +355,134 @@ export default function Focus() {
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 100,
-            background: "hsl(var(--paper-raised))",
-            border: "1.5px solid hsl(var(--line))",
-            borderRadius: 18,
-            boxShadow: "var(--shadow-warm-2)",
-            padding: "18px 20px",
             display: "flex",
             flexDirection: "column",
-            gap: 14,
-            minWidth: 280,
-            maxWidth: 340,
-            animation: "slideUp 0.25s ease-out",
+            gap: 10,
+            alignItems: "center",
             fontFamily: "Verdana, Geneva, sans-serif",
           }}
-          data-testid="study-toast"
         >
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "hsl(var(--ink))", lineHeight: 1.4 }}>
-            Nice work! Want to log a study session?
-          </p>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={() => { setShowStudyToast(false); navigate("/study"); }}
+          {/* Water reminder — above study toast */}
+          {showWaterToast && (
+            <div
               style={{
-                flex: 1,
-                padding: "9px 14px",
-                borderRadius: 999,
-                border: "none",
-                background: "hsl(var(--ink))",
-                color: "hsl(var(--paper-raised))",
-                fontSize: 13,
-                fontWeight: 700,
-                cursor: "pointer",
-                fontFamily: "Verdana, Geneva, sans-serif",
-              }}
-              data-testid="toast-yes"
-            >
-              Yes, open Study
-            </button>
-            <button
-              onClick={() => setShowStudyToast(false)}
-              style={{
-                padding: "9px 14px",
-                borderRadius: 999,
+                background: "hsl(var(--paper-raised))",
                 border: "1.5px solid hsl(var(--line))",
-                background: "transparent",
-                color: "hsl(var(--ink-soft))",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                fontFamily: "Verdana, Geneva, sans-serif",
+                borderRadius: 18,
+                boxShadow: "var(--shadow-warm-2)",
+                padding: "18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+                minWidth: 280,
+                maxWidth: 340,
+                animation: "slideUp 0.25s ease-out",
               }}
-              data-testid="toast-dismiss"
+              data-testid="water-toast"
             >
-              Dismiss
-            </button>
-          </div>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "hsl(var(--ink))", lineHeight: 1.4 }}>
+                You've been focused for over an hour today — had water recently?
+              </p>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => { logWaterGlass(); setShowWaterToast(false); }}
+                  style={{
+                    flex: 1,
+                    padding: "9px 14px",
+                    borderRadius: 999,
+                    border: "none",
+                    background: "hsl(var(--ink))",
+                    color: "hsl(var(--paper-raised))",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontFamily: "Verdana, Geneva, sans-serif",
+                  }}
+                  data-testid="water-toast-yes"
+                >
+                  Yes 💧
+                </button>
+                <button
+                  onClick={() => setShowWaterToast(false)}
+                  style={{
+                    padding: "9px 14px",
+                    borderRadius: 999,
+                    border: "1.5px solid hsl(var(--line))",
+                    background: "transparent",
+                    color: "hsl(var(--ink-soft))",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "Verdana, Geneva, sans-serif",
+                  }}
+                  data-testid="water-toast-dismiss"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Study prompt — bottom of stack */}
+          {showStudyToast && (
+            <div
+              style={{
+                background: "hsl(var(--paper-raised))",
+                border: "1.5px solid hsl(var(--line))",
+                borderRadius: 18,
+                boxShadow: "var(--shadow-warm-2)",
+                padding: "18px 20px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+                minWidth: 280,
+                maxWidth: 340,
+                animation: "slideUp 0.25s ease-out",
+              }}
+              data-testid="study-toast"
+            >
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "hsl(var(--ink))", lineHeight: 1.4 }}>
+                Nice work! Want to log a study session?
+              </p>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => { setShowStudyToast(false); navigate("/study"); }}
+                  style={{
+                    flex: 1,
+                    padding: "9px 14px",
+                    borderRadius: 999,
+                    border: "none",
+                    background: "hsl(var(--ink))",
+                    color: "hsl(var(--paper-raised))",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontFamily: "Verdana, Geneva, sans-serif",
+                  }}
+                  data-testid="toast-yes"
+                >
+                  Yes, open Study
+                </button>
+                <button
+                  onClick={() => setShowStudyToast(false)}
+                  style={{
+                    padding: "9px 14px",
+                    borderRadius: 999,
+                    border: "1.5px solid hsl(var(--line))",
+                    background: "transparent",
+                    color: "hsl(var(--ink-soft))",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "Verdana, Geneva, sans-serif",
+                  }}
+                  data-testid="toast-dismiss"
+                >
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <Footer />

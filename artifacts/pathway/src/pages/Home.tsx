@@ -139,7 +139,7 @@ export default function Home() {
           <div className="step-enter flex flex-col items-center w-full">
             <span className="text-ink-soft text-sm font-medium tracking-wide uppercase mb-6" data-testid="text-eyebrow">ADHDrive</span>
             <h1 className="text-4xl text-ink mb-4" data-testid="text-heading">What do you need right now?</h1>
-            <p className="text-ink-soft mb-10 leading-relaxed" data-testid="text-subtitle">Take a breath. Choose a path for this session.</p>
+            <p className="text-ink-soft mb-10 leading-relaxed" data-testid="text-subtitle">No pressure. Just pick what feels right.</p>
             <button 
               className="btn-primary w-full max-w-[240px]"
               onClick={() => setStep("intent")}
@@ -152,14 +152,14 @@ export default function Home() {
 
         {step === "intent" && (
           <div className="step-enter flex flex-col w-full text-left">
-            <h2 className="text-2xl text-ink mb-6 text-center" data-testid="text-heading-intent">I need to...</h2>
+            <h2 className="text-2xl text-ink mb-6 text-center" data-testid="text-heading-intent">Right now I want to...</h2>
             <div className="space-y-3">
               <button className="btn-choice group" onClick={() => handleIntent("learn")} data-testid="choice-learn">
-                <span className="font-medium text-[17px]">Learn or review something</span>
+                <span className="font-medium text-[17px]">Study something</span>
                 <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </button>
               <button className="btn-choice group" onClick={() => handleIntent("focus")} data-testid="choice-focus">
-                <span className="font-medium text-[17px]">Get focused and do a task</span>
+                <span className="font-medium text-[17px]">Actually focus for a bit</span>
                 <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </button>
               <button className="btn-choice group" onClick={() => handleIntent("plan")} data-testid="choice-plan">
@@ -167,7 +167,7 @@ export default function Home() {
                 <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </button>
               <button className="btn-choice group" onClick={() => handleIntent("build")} data-testid="choice-build">
-                <span className="font-medium text-[17px]">Fix or build study material</span>
+                <span className="font-medium text-[17px]">Make or fix my notes</span>
                 <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </button>
             </div>
@@ -256,7 +256,7 @@ export default function Home() {
           className="text-ink-soft hover:text-ink text-sm font-medium transition-colors"
           data-testid="link-hub"
         >
-          Skip — show me everything
+          Just take me to the app
         </button>
       </div>
 

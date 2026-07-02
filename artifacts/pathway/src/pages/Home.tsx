@@ -10,7 +10,7 @@ const themeOptions: { id: Theme; label: string; swatch: string }[] = [
   { id: "warm",  label: "Warm",  swatch: "hsl(30 42% 90%)" },
 ];
 
-type Step = "welcome" | "intent" | "learn-detail" | "focus-detail" | "plan-detail" | "build-detail" | "redirecting";
+type Step = "welcome" | "intent" | "focus-detail" | "plan-detail" | "build-detail" | "redirecting";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -154,7 +154,7 @@ export default function Home() {
           <div className="step-enter flex flex-col w-full text-left">
             <h2 className="text-2xl text-ink mb-6 text-center" data-testid="text-heading-intent">Right now I want to...</h2>
             <div className="space-y-3">
-              <button className="btn-choice group" onClick={() => handleIntent("learn")} data-testid="choice-learn">
+              <button className="btn-choice group" onClick={() => handleRedirect("/study")} data-testid="choice-learn">
                 <span className="font-medium text-[17px]">Study something</span>
                 <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </button>
@@ -168,22 +168,6 @@ export default function Home() {
               </button>
               <button className="btn-choice group" onClick={() => handleIntent("build")} data-testid="choice-build">
                 <span className="font-medium text-[17px]">Make or fix my notes</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "learn-detail" && (
-          <div className="step-enter flex flex-col w-full text-left">
-            <h2 className="text-2xl text-ink mb-6 text-center">What are you reviewing?</h2>
-            <div className="space-y-3">
-              <button className="btn-choice group" onClick={() => handleRedirect("/study", { review: 'theory' })}>
-                <span className="font-medium text-[17px]">Driving theory test</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleRedirect("/study?mode=generic", { review: 'other' })}>
-                <span className="font-medium text-[17px]">Something else</span>
                 <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </button>
             </div>

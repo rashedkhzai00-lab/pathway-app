@@ -10,6 +10,7 @@ permissions:
 
 jobs:
   deploy:
+    if: github.actor != 'github-actions[bot]' # Skips the loop if the bot made the push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

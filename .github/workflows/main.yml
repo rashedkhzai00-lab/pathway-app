@@ -1,39 +1,41 @@
 name: Deploy to GitHub Pages
 
-on:
-  push:
-    branches: [main]
+  on:
+    push:
+      branches: [main]
+    workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  permissions:
+    contents: write
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9
+        - uses: pnpm/action-setup@v4
+          with:
+            version: 10
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
+        - uses: actions/setup-node@v4
+          with:
+            node-version: 24
+            cache: pnpm
 
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        - name: Install dependencies
+          run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
-        env:
-          PORT: 3000
+        - name: Build
+          run: pnpm --filter @workspace/pathway run build
+          env:
+            PORT: 3000
+            BASE_PATH: /
 
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: artifacts/pathway/dist/public
-
-      - uses: actions/deploy-pages@v4
+        - name: Deploy to gh-pages
+          uses: peaceiris/actions-gh-pages@v4
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: artifacts/pathway/dist/public
+            publish_branch: gh-pages
+  

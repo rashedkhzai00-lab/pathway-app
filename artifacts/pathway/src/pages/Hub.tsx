@@ -17,7 +17,7 @@ const modules = [
   {
     id: "study",
     label: "Study",
-    description: "Category practice and mock exam mode for driving theory.",
+    description: "Quiz yourself on any topic using flashcards and practice modes.",
     icon: BookOpen,
     href: "/study",
     status: "ready" as const,

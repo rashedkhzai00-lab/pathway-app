@@ -1,44 +1,34 @@
 name: Deploy to GitHub Pages
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: write
-
 jobs:
   deploy:
     if: github.actor != 'github-actions[bot]' # Skips the loop if the bot made the push
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 10
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
       - name: Build
         run: pnpm --filter @workspace/pathway run build
         env:
           PORT: 3000
-          BASE_PATH: /pathway-app/
-
+          BASE_PATH: /
       - name: Copy index.html as 404.html for SPA routing
         run: cp artifacts/pathway/dist/public/index.html artifacts/pathway/dist/public/404.html
-
       - name: Write CNAME for custom domain
         run: echo "adhdrive.app" > artifacts/pathway/dist/public/CNAME
-
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

@@ -1,29 +1,7 @@
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
 import { useSearch } from "wouter";
 import Footer from "../components/Footer";
-
-const STORAGE_KEY = "pathway:questionBank";
-
-interface Question {
-  id: string;
-  category: string;
-  text: string;
-  options: [string, string, string, string];
-  correctIndex: number;
-  explanation: string;
-}
-
-function loadBank(): Question[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveBank(bank: Question[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(bank));
-}
+import { loadBank, saveBank, type Question } from "../lib/questionBank";
 
 const LETTERS = ["A", "B", "C", "D"] as const;
 
@@ -510,7 +488,7 @@ function AddEditTab({
           type="text"
           value={form.category}
           onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-          placeholder="e.g. Road signs, Right of way, Penalties"
+          placeholder="e.g. General knowledge, History, Science"
           required
           style={inputStyle}
         />

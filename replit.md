@@ -1,6 +1,6 @@
 # ADHDrive
 
-An ADHD-friendly driving theory study companion with four modules: Focus (Pomodoro timer), Study (quiz engine), Plan (task manager), and Create (question bank builder).
+An ADHD-friendly study companion with four modules: Focus (Pomodoro timer), Study (quiz engine), Plan (task manager), and Create (question bank builder). The app is subject-agnostic — the question bank works for any topic, not just driving theory.
 
 ## Run & Operate
 

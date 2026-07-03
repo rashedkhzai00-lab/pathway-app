@@ -1,21 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import Footer from "../components/Footer";
+import { loadBank, type Question } from "../lib/questionBank";
 
 // ─── Storage keys & types ────────────────────────────────────────────────────
 
-const BANK_KEY = "pathway:questionBank";
 const WEAK_KEY = "pathway:weakSpots";
 const SESSION_KEY = "pathway:activeSession";
-
-interface Question {
-  id: string;
-  category: string;
-  text: string;
-  options: [string, string, string, string];
-  correctIndex: number;
-  explanation: string;
-}
 
 interface Session {
   mode: "quick" | "exam" | "weak" | "category";
@@ -31,9 +22,6 @@ interface Session {
 
 // ─── Storage helpers ─────────────────────────────────────────────────────────
 
-function loadBank(): Question[] {
-  try { return JSON.parse(localStorage.getItem(BANK_KEY) || "[]"); } catch { return []; }
-}
 function loadWeak(): Record<string, number> {
   try { return JSON.parse(localStorage.getItem(WEAK_KEY) || "{}"); } catch { return {}; }
 }

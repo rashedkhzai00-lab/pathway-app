@@ -1,4 +1,5 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { useEffect } from "react";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +15,22 @@ import { useTheme } from "./hooks/useTheme";
 
 const queryClient = new QueryClient();
 
+const LAST_FEATURE_KEY = "pathway:lastUsedFeature";
+const TRACKED_FEATURES = new Set(["/focus", "/study", "/plan", "/create"]);
+
+function useTrackLastUsedFeature() {
+  const [location] = useLocation();
+  useEffect(() => {
+    if (TRACKED_FEATURES.has(location)) {
+      try {
+        localStorage.setItem(LAST_FEATURE_KEY, location);
+      } catch (e) {}
+    }
+  }, [location]);
+}
+
 function Router() {
+  useTrackLastUsedFeature();
   return (
     <Switch>
       <Route path="/" component={Home} />

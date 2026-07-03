@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { ChevronRight, Palette, Check } from "lucide-react";
+import { Palette, Check } from "lucide-react";
 import { useTheme, type Theme } from "../hooks/useTheme";
 import Footer from "../components/Footer";
 
@@ -10,12 +10,33 @@ const themeOptions: { id: Theme; label: string; swatch: string }[] = [
   { id: "warm",  label: "Warm",  swatch: "hsl(30 42% 90%)" },
 ];
 
-type Step = "welcome" | "intent" | "focus-detail" | "plan-detail" | "build-detail" | "redirecting";
+const LAST_FEATURE_KEY = "pathway:lastUsedFeature";
+const ROUTING_LOG_KEY = "pathway:routingLog";
+
+type RouteOption = {
+  id: string;
+  label: string;
+  path: string;
+};
+
+const routeOptions: RouteOption[] = [
+  { id: "distracted", label: "I keep getting distracted", path: "/focus" },
+  { id: "no-start", label: "I don't know where to start", path: "/plan?view=today" },
+  { id: "forgot-log", label: "I forgot to log yesterday", path: "/study" },
+  { id: "test-coming", label: "I have a test coming up", path: "/plan?view=week" },
+];
+
+function logRoutingChoice(choice: string) {
+  try {
+    const log = JSON.parse(localStorage.getItem(ROUTING_LOG_KEY) || "[]");
+    log.push({ choice, timestamp: Date.now() });
+    localStorage.setItem(ROUTING_LOG_KEY, JSON.stringify(log.slice(-200)));
+  } catch (e) {}
+}
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const [step, setStep] = useState<Step>("welcome");
-  const [intent, setIntent] = useState<string | null>(null);
+  const [redirecting, setRedirecting] = useState(false);
   const { theme, setTheme } = useTheme();
   const [themeOpen, setThemeOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -31,23 +52,21 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handler);
   }, [themeOpen]);
 
-  const handleIntent = (selectedIntent: "learn" | "focus" | "plan" | "build") => {
-    setIntent(selectedIntent);
-    setStep(`${selectedIntent}-detail` as Step);
-  };
-
-  const handleRedirect = (path: string, payload?: Record<string, string>) => {
-    setStep("redirecting");
-    
-    // Save to local storage
-    try {
-      const answers = JSON.parse(localStorage.getItem('pathway:lastAnswers') || '{}');
-      localStorage.setItem('pathway:lastAnswers', JSON.stringify({ ...answers, intent, ...payload }));
-    } catch (e) {}
-
+  const goTo = (path: string, choiceId: string) => {
+    logRoutingChoice(choiceId);
+    setRedirecting(true);
     setTimeout(() => {
       setLocation(path);
-    }, 1200);
+    }, 900);
+  };
+
+  const handleSurpriseMe = () => {
+    let path = "/focus";
+    try {
+      const last = localStorage.getItem(LAST_FEATURE_KEY);
+      if (last) path = last;
+    } catch (e) {}
+    goTo(path, "surprise-me");
   };
 
   return (
@@ -135,98 +154,35 @@ export default function Home() {
       </div>
 
       <div className="card-container flex flex-col items-center text-center">
-        {step === "welcome" && (
-          <div className="step-enter flex flex-col items-center w-full">
-            <span className="text-ink-soft text-sm font-medium tracking-wide uppercase mb-6" data-testid="text-eyebrow">ADHDrive</span>
-            <h1 className="text-4xl text-ink mb-4" data-testid="text-heading">What do you need right now?</h1>
-            <p className="text-ink-soft mb-10 leading-relaxed" data-testid="text-subtitle">No pressure. Just pick what feels right.</p>
-            <button 
-              className="btn-primary w-full max-w-[240px]"
-              onClick={() => setStep("intent")}
-              data-testid="button-start"
+        {!redirecting ? (
+          <div className="step-enter flex flex-col w-full">
+            <span className="text-ink-soft text-sm font-medium tracking-wide uppercase mb-6" data-testid="text-eyebrow">
+              ADHDrive
+            </span>
+            <h1 className="text-2xl text-ink mb-6" data-testid="text-heading">
+              What's going on right now?
+            </h1>
+            <div className="space-y-3 text-left">
+              {routeOptions.map((opt) => (
+                <button
+                  key={opt.id}
+                  className="btn-choice"
+                  onClick={() => goTo(opt.path, opt.id)}
+                  data-testid={`choice-${opt.id}`}
+                >
+                  <span className="font-medium text-[17px]">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              className="mt-4 w-full text-center text-sm font-medium text-ink-soft hover:text-ink py-3 rounded-[18px] border-[1.5px] border-dashed border-line transition-colors"
+              onClick={handleSurpriseMe}
+              data-testid="choice-surprise-me"
             >
-              Let's see
+              Just start something
             </button>
           </div>
-        )}
-
-        {step === "intent" && (
-          <div className="step-enter flex flex-col w-full text-left">
-            <h2 className="text-2xl text-ink mb-6 text-center" data-testid="text-heading-intent">Right now I want to...</h2>
-            <div className="space-y-3">
-              <button className="btn-choice group" onClick={() => handleRedirect("/study")} data-testid="choice-learn">
-                <span className="font-medium text-[17px]">Study something</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleIntent("focus")} data-testid="choice-focus">
-                <span className="font-medium text-[17px]">Actually focus for a bit</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleIntent("plan")} data-testid="choice-plan">
-                <span className="font-medium text-[17px]">See what's ahead / get organised</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleIntent("build")} data-testid="choice-build">
-                <span className="font-medium text-[17px]">Make or fix my notes</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "focus-detail" && (
-          <div className="step-enter flex flex-col w-full text-left">
-            <h2 className="text-2xl text-ink mb-6 text-center">How long do you have?</h2>
-            <div className="space-y-3">
-              <button className="btn-choice group" onClick={() => handleRedirect("/focus?len=15", { length: '15' })}>
-                <span className="font-medium text-[17px]">15 minutes</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleRedirect("/focus?len=25", { length: '25' })}>
-                <span className="font-medium text-[17px]">25 minutes</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleRedirect("/focus?len=50", { length: '50' })}>
-                <span className="font-medium text-[17px]">50 minutes</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "plan-detail" && (
-          <div className="step-enter flex flex-col w-full text-left">
-            <h2 className="text-2xl text-ink mb-6 text-center">What do you want to see?</h2>
-            <div className="space-y-3">
-              <button className="btn-choice group" onClick={() => handleRedirect("/plan?view=today", { view: 'today' })}>
-                <span className="font-medium text-[17px]">Just today</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleRedirect("/plan?view=week", { view: 'week' })}>
-                <span className="font-medium text-[17px]">This week</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "build-detail" && (
-          <div className="step-enter flex flex-col w-full text-left">
-            <h2 className="text-2xl text-ink mb-6 text-center">What kind of material?</h2>
-            <div className="space-y-3">
-              <button className="btn-choice group" onClick={() => handleRedirect("/create?type=fix", { type: 'fix' })}>
-                <span className="font-medium text-[17px]">Fix existing questions</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-              <button className="btn-choice group" onClick={() => handleRedirect("/create?type=new", { type: 'new' })}>
-                <span className="font-medium text-[17px]">Create new ones from notes</span>
-                <ChevronRight className="w-5 h-5 text-ink-soft opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "redirecting" && (
+        ) : (
           <div className="step-enter flex flex-col items-center justify-center py-8">
             <div className="spinner mb-6"></div>
             <p className="text-ink text-lg font-serif">Taking you there...</p>
@@ -235,7 +191,7 @@ export default function Home() {
       </div>
 
       <div className="mt-8 z-20">
-        <button 
+        <button
           onClick={() => setLocation("/hub")}
           className="text-ink-soft hover:text-ink text-sm font-medium transition-colors"
           data-testid="link-hub"

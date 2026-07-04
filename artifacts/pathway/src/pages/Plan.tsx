@@ -47,12 +47,18 @@ function getRangeDates(view: string) {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type Urgency = "!" | "!!" | "!!!";
+
+const URGENCY_ORDER: Record<Urgency, number> = { "!": 1, "!!": 2, "!!!": 3 };
+const URGENCY_OPTIONS: Urgency[] = ["!", "!!", "!!!"];
+
 interface PlanItem {
   id: string;
   text: string;
   date: string;
   time: string;
   done: boolean;
+  urgency: Urgency;
 }
 
 interface StudySession {
@@ -66,7 +72,10 @@ interface StudySession {
 // ─── Storage ──────────────────────────────────────────────────────────────────
 
 function loadTasks(): PlanItem[] {
-  try { return JSON.parse(localStorage.getItem(TASKS_KEY) || "[]"); } catch { return []; }
+  try {
+    const raw: PlanItem[] = JSON.parse(localStorage.getItem(TASKS_KEY) || "[]");
+    return raw.map((i) => ({ ...i, urgency: URGENCY_OPTIONS.includes(i.urgency) ? i.urgency : "!" }));
+  } catch { return []; }
 }
 function saveTasks(items: PlanItem[]) {
   localStorage.setItem(TASKS_KEY, JSON.stringify(items));
@@ -96,6 +105,7 @@ export default function Plan() {
   const [taskText, setTaskText]   = useState("");
   const [dateVal, setDateVal]     = useState(todayStr());
   const [timeVal, setTimeVal]     = useState("");
+  const [urgencyVal, setUrgencyVal] = useState<Urgency>("!");
   const taskInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { saveTasks(items); }, [items]);
@@ -106,10 +116,11 @@ export default function Plan() {
     if (!text) return;
     setItems((prev) => [...prev, {
       id: "item-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
-      text, date: dateVal || todayStr(), time: timeVal, done: false,
+      text, date: dateVal || todayStr(), time: timeVal, done: false, urgency: urgencyVal,
     }]);
     setTaskText("");
     setTimeVal("");
+    setUrgencyVal("!");
     taskInputRef.current?.focus();
   }
 
@@ -126,6 +137,8 @@ export default function Plan() {
       let dayItems = items.filter((i) => i.date === dateStr);
       if (!showCompleted) dayItems = dayItems.filter((i) => !i.done);
       dayItems = [...dayItems].sort((a, b) => {
+        const urgencyDiff = URGENCY_ORDER[b.urgency] - URGENCY_ORDER[a.urgency];
+        if (urgencyDiff !== 0) return urgencyDiff;
         if (!a.time && !b.time) return 0;
         if (!a.time) return 1;
         if (!b.time) return -1;
@@ -364,6 +377,32 @@ export default function Plan() {
                 aria-label="Time (optional)"
                 style={{ border: "1.5px solid hsl(var(--line))", borderRadius: 10, background: "hsl(var(--paper-raised))", fontFamily: FF, fontSize: 13, color: "hsl(var(--ink-soft))", padding: "7px 8px" }}
               />
+              <div role="group" aria-label="Urgency" style={{ display: "inline-flex", background: "hsl(var(--paper-raised))", border: "1.5px solid hsl(var(--line))", borderRadius: 999, padding: 3, gap: 2 }}>
+                {URGENCY_OPTIONS.map((u) => (
+                  <button
+                    key={u}
+                    type="button"
+                    aria-pressed={urgencyVal === u}
+                    aria-label={`Urgency ${u}`}
+                    onClick={() => setUrgencyVal(u)}
+                    style={{
+                      background: urgencyVal === u ? "hsl(var(--clay))" : "none",
+                      color: urgencyVal === u ? "hsl(var(--paper-raised))" : "hsl(var(--ink-soft))",
+                      border: "none",
+                      minWidth: 30,
+                      padding: "6px 8px",
+                      fontFamily: FF,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      borderRadius: 999,
+                      cursor: "pointer",
+                      transition: "all 0.18s ease",
+                    }}
+                  >
+                    {u}
+                  </button>
+                ))}
+              </div>
               <button
                 type="submit"
                 aria-label="Add item"
@@ -609,6 +648,21 @@ function ItemRow({ item, onToggle, onDelete }: { item: PlanItem; onToggle: (id: 
       />
       <span style={{ flex: 1, fontSize: 15, color: item.done ? "hsl(var(--ink-soft))" : "hsl(var(--ink))", textDecoration: item.done ? "line-through" : "none" }}>
         {item.text}
+      </span>
+      <span
+        aria-label={`Urgency ${item.urgency}`}
+        style={{
+          fontSize: 12,
+          fontWeight: 700,
+          color: item.urgency === "!!!" ? "hsl(var(--clay))" : "hsl(var(--ink-soft))",
+          background: "hsl(var(--paper-raised))",
+          border: "1.5px solid hsl(var(--line))",
+          borderRadius: 999,
+          padding: "2px 8px",
+          flexShrink: 0,
+        }}
+      >
+        {item.urgency}
       </span>
       {item.time && (
         <span style={{ fontSize: 12.5, color: "hsl(var(--ink-soft))", fontWeight: 600, flexShrink: 0 }}>

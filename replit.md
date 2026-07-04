@@ -27,6 +27,7 @@ An ADHD-friendly study companion with four modules: Focus (Pomodoro timer), Stud
 - Study module reads from `pathway:questionBank` written by Create module
 - Session state (`pathway:activeSession`) persists mid-quiz for resume support
 - Weak spots (`pathway:weakSpots`) track per-question miss counts
+- Quiz grouping: `pathway:quizzes` (localStorage) holds named quiz sets; each `Question` carries a `quizId`; legacy questions auto-migrate to the "Uncategorized" quiz on load. Create's `QuizBar` lets users create/switch/delete quiz sets and filters "My questions" + assigns new questions to the active quiz. Study's `QuizPicker` dropdown (only shown when 2+ quizzes exist) filters practice/exam pools by quiz.
 
 ## Product
 

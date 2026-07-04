@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "wouter";
 import Footer from "../components/Footer";
-import { loadBank, type Question } from "../lib/questionBank";
+import { loadBank, loadQuizzes, type Question, type Quiz } from "../lib/questionBank";
 
 // ─── Storage keys & types ────────────────────────────────────────────────────
 
@@ -102,6 +102,7 @@ export default function Study() {
   const [view, setView] = useState<View>("home");
   const [results, setResults] = useState<ResultsData | null>(null);
   const [, forceRender] = useState(0);
+  const [studyQuizId, setStudyQuizId] = useState<string>("all");
 
   function refresh() { forceRender(n => n + 1); }
 
@@ -160,12 +161,15 @@ export default function Study() {
           onCategory={() => setView("category")}
           onResume={() => setView("session")}
           refreshKey={forceRender}
+          studyQuizId={studyQuizId}
+          onStudyQuizChange={setStudyQuizId}
         />
       )}
       {view === "category" && (
         <CategoryView
           onBack={() => setView("home")}
           onStart={startSession}
+          studyQuizId={studyQuizId}
         />
       )}
       {view === "session" && (
@@ -190,19 +194,76 @@ export default function Study() {
 
 // ─── Home View ────────────────────────────────────────────────────────────────
 
+function QuizPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (quizId: string) => void;
+}) {
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+
+  useEffect(() => {
+    setQuizzes(loadQuizzes());
+  }, []);
+
+  if (quizzes.length <= 1) return null;
+
+  return (
+    <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <span
+        style={{
+          fontSize: 12.5,
+          fontWeight: 600,
+          color: "hsl(var(--ink-soft))",
+          letterSpacing: "0.02em",
+        }}
+      >
+        Studying
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          border: "1.5px solid hsl(var(--line))",
+          borderRadius: 10,
+          padding: "10px 12px",
+          fontFamily: "Verdana, Geneva, sans-serif",
+          fontSize: 14,
+          color: "hsl(var(--ink))",
+          background: "hsl(var(--paper))",
+          outline: "none",
+        }}
+      >
+        <option value="all">All quizzes</option>
+        {quizzes.map((quiz) => (
+          <option key={quiz.id} value={quiz.id}>
+            {quiz.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function HomeView({
   onStart,
   onCategory,
   onResume,
+  studyQuizId,
+  onStudyQuizChange,
 }: {
   onStart: (ids: string[], mode: Session["mode"], opts?: { timeLimitSeconds?: number; categoryName?: string }) => void;
   onCategory: () => void;
   onResume: () => void;
   refreshKey: React.Dispatch<React.SetStateAction<number>>;
+  studyQuizId: string;
+  onStudyQuizChange: (quizId: string) => void;
 }) {
-  const bank = loadBank();
+  const allBank = loadBank();
+  const bank = studyQuizId === "all" ? allBank : allBank.filter((q) => q.quizId === studyQuizId);
   const weak = loadWeak();
-  const weakIds = Object.keys(weak).filter((id) => weak[id] > 0);
+  const weakIds = Object.keys(weak).filter((id) => weak[id] > 0 && bank.some((q) => q.id === id));
   const cats = new Set(bank.map((q) => q.category));
   const session = loadSession();
   const hasResume = !!session && session.currentIndex < session.questionIds.length;
@@ -219,6 +280,8 @@ function HomeView({
           Study & Notes
         </h2>
       </div>
+
+      <QuizPicker value={studyQuizId} onChange={onStudyQuizChange} />
 
       {hasBank && (
         <div style={{ display: "flex", gap: 10 }}>
@@ -436,11 +499,14 @@ function ActionCard({
 function CategoryView({
   onBack,
   onStart,
+  studyQuizId,
 }: {
   onBack: () => void;
   onStart: (ids: string[], mode: Session["mode"], opts?: { categoryName?: string }) => void;
+  studyQuizId: string;
 }) {
-  const bank = loadBank();
+  const allBank = loadBank();
+  const bank = studyQuizId === "all" ? allBank : allBank.filter((q) => q.quizId === studyQuizId);
   const counts: Record<string, number> = {};
   bank.forEach((q) => { counts[q.category] = (counts[q.category] || 0) + 1; });
   const cats = Object.keys(counts).sort();

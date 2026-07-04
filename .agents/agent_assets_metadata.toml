@@ -1,8 +1,0 @@
-uploads = []
-generated = []
-
-[[outputs]]
-id = "3y4HqvQA9B3kNMYx8AKN5"
-uri = "file://artifacts/mockup-sandbox/dist.tar.gz"
-type = "unspecified"
-title = "dist.tar.gz — mockup-sandbox build output"

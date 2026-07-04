@@ -1,7 +1,16 @@
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
 import { useSearch } from "wouter";
 import Footer from "../components/Footer";
-import { loadBank, saveBank, type Question } from "../lib/questionBank";
+import {
+  loadBank,
+  saveBank,
+  loadQuizzes,
+  createQuiz,
+  deleteQuiz,
+  UNCATEGORIZED_QUIZ_ID,
+  type Question,
+  type Quiz,
+} from "../lib/questionBank";
 
 const LETTERS = ["A", "B", "C", "D"] as const;
 
@@ -91,14 +100,131 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
   );
 }
 
+// ─── Quiz bar ────────────────────────────────────────────────────────────────
+
+function QuizBar({
+  activeQuizId,
+  onChange,
+  refreshKey,
+}: {
+  activeQuizId: string;
+  onChange: (quizId: string) => void;
+  refreshKey: number;
+}) {
+  const [quizzes, setQuizzes] = useState<Quiz[]>(loadQuizzes);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  useEffect(() => {
+    setQuizzes(loadQuizzes());
+  }, [refreshKey]);
+
+  function handleCreate() {
+    if (!newName.trim()) {
+      setCreating(false);
+      return;
+    }
+    const quiz = createQuiz(newName);
+    setNewName("");
+    setCreating(false);
+    setQuizzes(loadQuizzes());
+    onChange(quiz.id);
+  }
+
+  function handleDelete(quizId: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!confirm("Delete this quiz set? Its questions will move to Uncategorized.")) return;
+    deleteQuiz(quizId);
+    setQuizzes(loadQuizzes());
+    if (activeQuizId === quizId) onChange(UNCATEGORIZED_QUIZ_ID);
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      <span style={fieldLabelStyle}>Quiz set</span>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        {quizzes.map((quiz) => {
+          const active = quiz.id === activeQuizId;
+          return (
+            <div
+              key={quiz.id}
+              onClick={() => onChange(quiz.id)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                background: active ? "hsl(var(--ink))" : "hsl(var(--paper))",
+                color: active ? "hsl(var(--paper-raised))" : "hsl(var(--ink-soft))",
+                border: `1.5px solid ${active ? "hsl(var(--ink))" : "hsl(var(--line))"}`,
+                borderRadius: 999,
+                padding: "8px 14px",
+                fontFamily: "Verdana, Geneva, sans-serif",
+                fontSize: 13,
+                fontWeight: 600,
+                cursor: "pointer",
+                transition: "all 0.18s ease",
+              }}
+            >
+              <span>{quiz.name}</span>
+              {quiz.id !== UNCATEGORIZED_QUIZ_ID && (
+                <span
+                  onClick={(e) => handleDelete(quiz.id, e)}
+                  aria-label={`Delete ${quiz.name}`}
+                  style={{ opacity: 0.75, fontWeight: 700 }}
+                >
+                  ✕
+                </span>
+              )}
+            </div>
+          );
+        })}
+
+        {creating ? (
+          <div style={{ display: "flex", gap: 6 }}>
+            <input
+              autoFocus
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+              placeholder="Quiz name…"
+              style={{
+                ...inputStyle,
+                width: 160,
+                padding: "8px 12px",
+                fontSize: 13,
+                borderRadius: 999,
+              }}
+            />
+            <button onClick={handleCreate} style={ghostBtnStyle}>
+              Add
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setCreating(true)}
+            style={{
+              ...ghostBtnStyle,
+              borderStyle: "dashed",
+            }}
+          >
+            + New quiz
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── My Questions tab ─────────────────────────────────────────────────────────
 
 function MineTab({
   onEdit,
   refreshKey,
+  activeQuizId,
 }: {
   onEdit: (q: Question) => void;
   refreshKey: number;
+  activeQuizId: string;
 }) {
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("");
@@ -108,9 +234,10 @@ function MineTab({
     setBank(loadBank());
   }, [refreshKey]);
 
-  const categories = [...new Set(bank.map((q) => q.category).filter(Boolean))].sort();
+  const scoped = bank.filter((q) => q.quizId === activeQuizId);
+  const categories = [...new Set(scoped.map((q) => q.category).filter(Boolean))].sort();
 
-  const filtered = bank
+  const filtered = scoped
     .filter((q) => {
       const q_ = search.trim().toLowerCase();
       const matchesQ =
@@ -426,9 +553,11 @@ const BLANK_FORM: FormState = {
 function AddEditTab({
   prefill,
   onSaved,
+  activeQuizId,
 }: {
   prefill: FormState | null;
   onSaved: () => void;
+  activeQuizId: string;
 }) {
   const [form, setForm] = useState<FormState>(prefill ?? BLANK_FORM);
 
@@ -452,10 +581,12 @@ function AddEditTab({
     }
 
     const bank = loadBank();
+    const existing = form.editId ? bank.find((q) => q.id === form.editId) : undefined;
     const payload: Question = {
       id:
         form.editId ||
         "q-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      quizId: existing?.quizId ?? activeQuizId,
       category: form.category.trim() || "Uncategorized",
       text: form.text.trim(),
       options: form.options.map((o) => o.trim()) as Question["options"],
@@ -761,6 +892,7 @@ export default function Create() {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [addPrefill, setAddPrefill] = useState<FormState | null>(null);
   const [mineKey, setMineKey] = useState(0);
+  const [activeQuizId, setActiveQuizId] = useState<string>(UNCATEGORIZED_QUIZ_ID);
 
   function handleEditQ(q: Question) {
     setAddPrefill({
@@ -857,13 +989,15 @@ export default function Create() {
           </p>
         </div>
 
+        <QuizBar activeQuizId={activeQuizId} onChange={setActiveQuizId} refreshKey={mineKey} />
+
         <TabBar active={tab} onChange={setTab} />
 
         {tab === "mine" && (
-          <MineTab onEdit={handleEditQ} refreshKey={mineKey} />
+          <MineTab onEdit={handleEditQ} refreshKey={mineKey} activeQuizId={activeQuizId} />
         )}
         {tab === "add" && (
-          <AddEditTab prefill={addPrefill} onSaved={handleSaved} />
+          <AddEditTab prefill={addPrefill} onSaved={handleSaved} activeQuizId={activeQuizId} />
         )}
         {tab === "notes" && (
           <NotesTab onUseChunk={handleUseChunk} />

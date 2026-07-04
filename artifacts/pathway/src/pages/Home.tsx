@@ -22,8 +22,8 @@ type RouteOption = {
 const routeOptions: RouteOption[] = [
   { id: "distracted", label: "I keep getting distracted", path: "/focus" },
   { id: "no-start", label: "I don't know where to start", path: "/plan?view=today" },
-  { id: "forgot-log", label: "I forgot to log yesterday", path: "/study" },
-  { id: "test-coming", label: "I have a test coming up", path: "/plan?view=week" },
+  { id: "forgot-log", label: "I need to plan my days and tasks", path: "/plan?view=week" },
+  { id: "test-coming", label: "I have a test coming up", path: "/study" },
 ];
 
 function logRoutingChoice(choice: string) {

@@ -7,6 +7,7 @@ import {
   loadQuizzes,
   createQuiz,
   deleteQuiz,
+  getUniqueCategories,
   UNCATEGORIZED_QUIZ_ID,
   type Question,
   type Quiz,
@@ -530,6 +531,173 @@ function IconBtn({
   );
 }
 
+// ─── Category autocomplete ─────────────────────────────────────────────────
+
+function CategoryInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [highlightIndex, setHighlightIndex] = useState(0);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setAllCategories(getUniqueCategories());
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filtered = allCategories.filter((c) =>
+    c.toLowerCase().includes(value.toLowerCase())
+  );
+
+  function selectCategory(category: string) {
+    onChange(category);
+    setOpen(false);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!open) {
+      if (e.key === "ArrowDown") {
+        setOpen(true);
+        setHighlightIndex(0);
+      }
+      return;
+    }
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightIndex((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && filtered[highlightIndex]) {
+      e.preventDefault();
+      selectCategory(filtered[highlightIndex]);
+    } else if (e.key === "Escape") {
+      setOpen(false);
+    }
+  }
+
+  return (
+    <div ref={containerRef} style={{ position: "relative", width: "100%" }}>
+      <div style={{ display: "flex", alignItems: "stretch", ...inputStyle, padding: 0 }}>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+            setOpen(true);
+            setHighlightIndex(0);
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={handleKeyDown}
+          placeholder="e.g. General knowledge, History, Science"
+          required
+          style={{
+            flex: 1,
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            color: "inherit",
+            font: "inherit",
+            padding: "11px 14px",
+            minWidth: 0,
+          }}
+        />
+        {allCategories.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            aria-label="Show previous categories"
+            style={{
+              border: "none",
+              borderLeft: "1.5px solid hsl(var(--line))",
+              background: "none",
+              color: "hsl(var(--ink-soft))",
+              padding: "0 12px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              style={{
+                transform: open ? "rotate(180deg)" : "none",
+                transition: "transform 0.15s ease",
+              }}
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {open && filtered.length > 0 && (
+        <ul
+          style={{
+            position: "absolute",
+            zIndex: 10,
+            marginTop: 4,
+            width: "100%",
+            maxHeight: 224,
+            overflowY: "auto",
+            borderRadius: 12,
+            border: "1.5px solid hsl(var(--line))",
+            background: "hsl(var(--paper))",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+            listStyle: "none",
+            padding: 4,
+            margin: "4px 0 0",
+          }}
+        >
+          {filtered.map((category, i) => (
+            <li key={category}>
+              <button
+                type="button"
+                onClick={() => selectCategory(category)}
+                onMouseEnter={() => setHighlightIndex(i)}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  border: "none",
+                  borderRadius: 8,
+                  padding: "8px 12px",
+                  fontSize: 14,
+                  cursor: "pointer",
+                  background: i === highlightIndex ? "hsl(var(--paper-raised))" : "transparent",
+                  color: "hsl(var(--ink))",
+                }}
+              >
+                {category}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 // ─── Add/Edit tab ─────────────────────────────────────────────────────────────
 
 interface FormState {
@@ -615,13 +783,9 @@ function AddEditTab({
       {/* Category */}
       <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <span style={fieldLabelStyle}>Category</span>
-        <input
-          type="text"
+        <CategoryInput
           value={form.category}
-          onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-          placeholder="e.g. General knowledge, History, Science"
-          required
-          style={inputStyle}
+          onChange={(category) => setForm((f) => ({ ...f, category }))}
         />
       </label>
 

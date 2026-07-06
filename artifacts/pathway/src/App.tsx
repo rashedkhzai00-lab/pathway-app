@@ -12,6 +12,8 @@ import Plan from "./pages/Plan";
 import Create from "./pages/Create";
 import Hub from "./pages/Hub";
 import { useTheme } from "./hooks/useTheme";
+import { FocusTimerProvider } from "./hooks/useFocusTimer";
+import FloatingTimerBar from "./components/FloatingTimerBar";
 
 const queryClient = new QueryClient();
 
@@ -49,9 +51,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
+        <FocusTimerProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+            <FloatingTimerBar />
+          </WouterRouter>
+        </FocusTimerProvider>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

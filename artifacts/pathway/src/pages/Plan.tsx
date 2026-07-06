@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useSearch } from "wouter";
 import Footer from "../components/Footer";
+import MonthView from "../components/MonthView";
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ type Urgency = "!" | "!!" | "!!!";
 const URGENCY_ORDER: Record<Urgency, number> = { "!": 1, "!!": 2, "!!!": 3 };
 const URGENCY_OPTIONS: Urgency[] = ["!", "!!", "!!!"];
 
-interface PlanItem {
+export interface PlanItem {
   id: string;
   text: string;
   date: string;
@@ -93,7 +94,8 @@ function saveSessions(sessions: StudySession[]) {
 export default function Plan() {
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const initialView  = params.get("view") === "week" ? "week" : "today";
+  const initialView: "today" | "week" | "month" =
+    params.get("view") === "week" ? "week" : params.get("view") === "month" ? "month" : "today";
   const initialTab   = params.get("tab")  === "sessions" ? "sessions" : "tasks";
 
   const [mainTab, setMainTab] = useState<"tasks" | "sessions">(initialTab);
@@ -131,7 +133,22 @@ export default function Plan() {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
-  const rangeDates = getRangeDates(view);
+  function addTaskForDate(date: string, text: string, time?: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setItems((prev) => [...prev, {
+      id: "item-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+      text: trimmed, date, time: time || "", done: false, urgency: "!",
+    }]);
+  }
+
+  function updateItemText(id: string, text: string) {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setItems((prev) => prev.map((i) => i.id === id ? { ...i, text: trimmed } : i));
+  }
+
+  const rangeDates = view === "month" ? [] : getRangeDates(view);
   const groups = rangeDates
     .map((dateStr) => {
       let dayItems = items.filter((i) => i.date === dateStr);
@@ -287,7 +304,7 @@ export default function Plan() {
         {mainTab === "tasks" && (
           <>
             <h2 style={{ margin: 0, fontSize: "1.75rem", fontWeight: 700, color: "hsl(var(--ink))" }}>
-              {view === "today" ? "Today" : "This week"}
+              {view === "today" ? "Today" : view === "week" ? "This week" : "Month"}
             </h2>
 
             {/* View toggle */}
@@ -304,7 +321,7 @@ export default function Plan() {
                 gap: 2,
               }}
             >
-              {(["today", "week"] as const).map((v) => (
+              {(["today", "week", "month"] as const).map((v) => (
                 <button
                   key={v}
                   role="tab"
@@ -323,12 +340,23 @@ export default function Plan() {
                     transition: "all 0.18s ease",
                   }}
                 >
-                  {v === "today" ? "Today" : "This week"}
+                  {v === "today" ? "Today" : v === "week" ? "This week" : "Month"}
                 </button>
               ))}
             </div>
 
+            {view === "month" && (
+              <MonthView
+                items={items}
+                onToggle={toggleDone}
+                onDelete={deleteItem}
+                onAdd={addTaskForDate}
+                onUpdateText={updateItemText}
+              />
+            )}
+
             {/* Add task form */}
+            {view !== "month" && (
             <form
               onSubmit={addItem}
               style={{
@@ -428,7 +456,10 @@ export default function Plan() {
                 +
               </button>
             </form>
+            )}
 
+            {view !== "month" && (
+            <>
             {/* Task list */}
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               {groups.map(({ dateStr, dayItems }) => (
@@ -457,6 +488,8 @@ export default function Plan() {
             >
               {showCompleted ? "Hide completed" : "Show completed"}
             </button>
+            </>
+            )}
           </>
         )}
 

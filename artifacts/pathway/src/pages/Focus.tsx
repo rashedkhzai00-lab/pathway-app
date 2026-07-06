@@ -1,47 +1,14 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearch, useLocation } from "wouter";
 import Footer from "../components/Footer";
+import { useFocusTimer } from "../hooks/useFocusTimer";
 
 const CIRCUMFERENCE = 2 * Math.PI * 108;
-const BREAK_MAP: Record<number, number> = { 5: 1, 15: 5, 25: 5, 50: 10 };
-const STREAK_KEY = "pathway:focusStreak";
-const FOCUS_TIME_KEY = "pathway:focusDailyMinutes";
 const WATER_LOG_KEY = "pathway:waterLog";
 
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-}
-
-function getStreakCount(): number {
-  try {
-    const raw = JSON.parse(localStorage.getItem(STREAK_KEY) || "{}");
-    return raw[todayKey()] || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function incrementStreak(): number {
-  let raw: Record<string, number> = {};
-  try {
-    raw = JSON.parse(localStorage.getItem(STREAK_KEY) || "{}");
-  } catch {}
-  const key = todayKey();
-  raw[key] = (raw[key] || 0) + 1;
-  localStorage.setItem(STREAK_KEY, JSON.stringify(raw));
-  return raw[key];
-}
-
-function addFocusMinutes(min: number): number {
-  let raw: Record<string, number> = {};
-  try {
-    raw = JSON.parse(localStorage.getItem(FOCUS_TIME_KEY) || "{}");
-  } catch {}
-  const key = todayKey();
-  raw[key] = (raw[key] || 0) + min;
-  localStorage.setItem(FOCUS_TIME_KEY, JSON.stringify(raw));
-  return raw[key];
 }
 
 function logWaterGlass(): void {
@@ -60,56 +27,53 @@ function formatTime(sec: number): string {
   return `${m}:${s}`;
 }
 
-function playChime() {
-  try {
-    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-    const now = ctx.currentTime;
-    [660, 880].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.0001, now + i * 0.18);
-      gain.gain.exponentialRampToValueAtTime(0.15, now + i * 0.18 + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.18 + 0.5);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now + i * 0.18);
-      osc.stop(now + i * 0.18 + 0.55);
-    });
-  } catch {}
-}
-
 export default function Focus() {
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const rawLen = parseInt(params.get("len") || "25", 10);
-  const defaultLen = [5, 15, 25, 50].includes(rawLen) ? rawLen : 25;
+  const rawLen = params.get("len") ? parseInt(params.get("len")!, 10) : null;
+  const requestedLen = rawLen !== null && [5, 15, 25, 50].includes(rawLen) ? rawLen : null;
 
-  const [focusMinutes, setFocusMinutes] = useState(defaultLen);
-  const [phase, setPhase] = useState<"work" | "break">("work");
-  const [round, setRound] = useState(1);
-  const [totalSeconds, setTotalSeconds] = useState(defaultLen * 60);
-  const [remainingSeconds, setRemainingSeconds] = useState(defaultLen * 60);
-  const [running, setRunning] = useState(false);
-  const [streak, setStreak] = useState(getStreakCount);
+  const {
+    running,
+    phase,
+    round,
+    focusMinutes,
+    totalSeconds,
+    remainingSeconds,
+    streak,
+    lastCompletion,
+    start,
+    pause,
+    reset,
+    skip,
+    applyLength,
+  } = useFocusTimer();
+
   const [showStudyToast, setShowStudyToast] = useState(false);
   const [showWaterToast, setShowWaterToast] = useState(false);
   const [, navigate] = useLocation();
-
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const endTimestampRef = useRef<number>(0);
+  const lastHandledCompletionAt = useRef<number | null>(null);
 
   const phaseIsWork = phase === "work";
   const ringOffset = CIRCUMFERENCE * (1 - remainingSeconds / Math.max(totalSeconds, 1));
 
-  const clearTimer = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
+  // apply an explicit ?len= request once on mount, without clobbering an
+  // already in-flight session when the user simply navigates back here
+  useEffect(() => {
+    if (requestedLen !== null) applyLength(requestedLen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const renderTime = useCallback(() => formatTime(remainingSeconds), [remainingSeconds]);
+  useEffect(() => {
+    if (!lastCompletion) return;
+    if (lastCompletion.at === lastHandledCompletionAt.current) return;
+    lastHandledCompletionAt.current = lastCompletion.at;
+
+    if (lastCompletion.phase === "work") {
+      setShowStudyToast(true);
+      if (lastCompletion.checkWater) setShowWaterToast(true);
+    }
+  }, [lastCompletion]);
 
   useEffect(() => {
     const label = running
@@ -118,108 +82,11 @@ export default function Focus() {
     document.title = label;
   }, [running, remainingSeconds, phase]);
 
-  const completePhase = useCallback((currentPhase: "work" | "break", currentRound: number, currentFocusMin: number) => {
-    clearTimer();
-    setRunning(false);
-    playChime();
-
-    if (currentPhase === "work") {
-      const newCount = incrementStreak();
-      setStreak(newCount);
-      const newDailyMin = addFocusMinutes(currentFocusMin);
-      const breakSec = (BREAK_MAP[currentFocusMin] || 5) * 60;
-      setPhase("break");
-      setTotalSeconds(breakSec);
-      setRemainingSeconds(breakSec);
-      setShowStudyToast(true);
-      if (newDailyMin >= 60) setShowWaterToast(true);
-    } else {
-      const newRound = currentRound + 1;
-      setRound(newRound);
-      const workSec = currentFocusMin * 60;
-      setPhase("work");
-      setTotalSeconds(workSec);
-      setRemainingSeconds(workSec);
-    }
-  }, [clearTimer]);
-
-  const startTimer = useCallback(() => {
-    if (running) return;
-    setRunning(true);
-    endTimestampRef.current = Date.now() + remainingSeconds * 1000;
-
-    intervalRef.current = setInterval(() => {
-      const now = Date.now();
-      const rem = Math.round((endTimestampRef.current - now) / 1000);
-      if (rem <= 0) {
-        setRemainingSeconds(0);
-        setPhase(p => {
-          setRound(r => {
-            setFocusMinutes(fm => {
-              completePhase(p, r, fm);
-              return fm;
-            });
-            return r;
-          });
-          return p;
-        });
-      } else {
-        setRemainingSeconds(rem);
-      }
-    }, 250);
-  }, [running, remainingSeconds, completePhase]);
-
-  const pauseTimer = useCallback(() => {
-    clearTimer();
-    setRunning(false);
-  }, [clearTimer]);
-
-  const resetTimer = useCallback(() => {
-    clearTimer();
-    setRunning(false);
-    setRemainingSeconds(totalSeconds);
-  }, [clearTimer, totalSeconds]);
-
-  const skipPhase = useCallback(() => {
-    clearTimer();
-    setRunning(false);
-    setPhase(p => {
-      setRound(r => {
-        setFocusMinutes(fm => {
-          if (p === "work") {
-            const breakSec = (BREAK_MAP[fm] || 5) * 60;
-            setPhase("break");
-            setTotalSeconds(breakSec);
-            setRemainingSeconds(breakSec);
-            setShowStudyToast(true);
-          } else {
-            const newRound = r + 1;
-            setRound(newRound);
-            const workSec = fm * 60;
-            setPhase("work");
-            setTotalSeconds(workSec);
-            setRemainingSeconds(workSec);
-          }
-          return fm;
-        });
-        return r;
-      });
-      return p;
-    });
-  }, [clearTimer]);
-
-  const applyLength = useCallback((min: number) => {
-    if (running) return;
-    setFocusMinutes(min);
-    if (phase === "work") {
-      setTotalSeconds(min * 60);
-      setRemainingSeconds(min * 60);
-    }
-  }, [running, phase]);
-
   useEffect(() => {
-    return () => { clearTimer(); document.title = "ADHDrive"; };
-  }, [clearTimer]);
+    return () => {
+      document.title = "ADHDrive";
+    };
+  }, []);
 
   const strokeColor = phaseIsWork ? "var(--color-clay)" : "var(--color-sage)";
 
@@ -279,7 +146,7 @@ export default function Focus() {
               style={{ fontSize: 52 }}
               data-testid="text-time-display"
             >
-              {renderTime()}
+              {formatTime(remainingSeconds)}
             </span>
             <span className="text-sm text-ink-soft font-medium" data-testid="text-round-label">
               {phaseIsWork ? `Round ${round}` : `After round ${round}`}
@@ -291,7 +158,7 @@ export default function Focus() {
         <div className="flex items-center gap-3.5" data-testid="controls">
           <button
             className="btn-secondary text-sm px-4 py-2.5"
-            onClick={resetTimer}
+            onClick={reset}
             aria-label="Reset timer"
             data-testid="button-reset"
           >
@@ -299,7 +166,7 @@ export default function Focus() {
           </button>
           <button
             className="btn-primary px-8 py-3.5 text-base"
-            onClick={running ? pauseTimer : startTimer}
+            onClick={running ? pause : start}
             style={running ? { backgroundColor: "var(--color-clay)" } : {}}
             data-testid="button-start-pause"
           >
@@ -307,7 +174,7 @@ export default function Focus() {
           </button>
           <button
             className="btn-secondary text-sm px-4 py-2.5"
-            onClick={skipPhase}
+            onClick={skip}
             aria-label="Skip to next"
             data-testid="button-skip"
           >

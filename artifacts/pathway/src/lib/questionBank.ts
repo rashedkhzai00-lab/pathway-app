@@ -126,3 +126,17 @@ export function saveBank(bank: Question[]) {
 export function getQuestionsForQuiz(quizId: string): Question[] {
   return loadBank().filter((q) => q.quizId === quizId);
 }
+
+export function getUniqueCategories(): string[] {
+  const bank = loadBank();
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (let i = bank.length - 1; i >= 0; i--) {
+    const category = bank[i].category?.trim();
+    if (category && !seen.has(category)) {
+      seen.add(category);
+      result.push(category);
+    }
+  }
+  return result;
+}

@@ -11,6 +11,7 @@ import Study from "./pages/Study";
 import Plan from "./pages/Plan";
 import Create from "./pages/Create";
 import Hub from "./pages/Hub";
+import Tips from "./pages/Tips";
 import { useTheme } from "./hooks/useTheme";
 import { FocusTimerProvider } from "./hooks/useFocusTimer";
 import FloatingTimerBar from "./components/FloatingTimerBar";
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/plan" component={Plan} />
       <Route path="/create" component={Create} />
       <Route path="/hub" component={Hub} />
+      <Route path="/tips" component={Tips} />
       <Route component={NotFound} />
     </Switch>
   );

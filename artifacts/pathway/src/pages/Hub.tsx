@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Timer, BookOpen, CalendarDays, PenLine } from "lucide-react";
+import { Timer, BookOpen, CalendarDays, PenLine, Lightbulb } from "lucide-react";
 import { useTheme, type Theme } from "../hooks/useTheme";
 import Footer from "../components/Footer";
 
@@ -43,6 +43,16 @@ const modules = [
     status: "ready" as const,
     accentVar: "--color-dusty-blue",
     bgVar: "hsl(210 25% 48% / 0.1)",
+  },
+  {
+    id: "tips",
+    label: "Tips",
+    description: "Bite-sized ADHD strategies — focus, routines, motivation, and environment.",
+    icon: Lightbulb,
+    href: "/tips",
+    status: "ready" as const,
+    accentVar: "--color-clay",
+    bgVar: "hsl(46 80% 56% / 0.12)",
   },
 ];
 

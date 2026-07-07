@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import Footer from "../components/Footer";
-import { TIPS, TIP_CATEGORIES, SOURCE_URL, SOURCE_LABEL } from "../lib/tipsData";
+import { TIPS, TIP_CATEGORIES, SOURCE_URL, DISCLAIMER } from "../lib/tipsData";
 
 const FF = "Verdana, Geneva, sans-serif";
 
@@ -27,7 +27,7 @@ export default function Tips() {
       <div
         style={{
           width: "100%",
-          maxWidth: 560,
+          maxWidth: 600,
           background: "hsl(var(--paper-raised))",
           border: "1px solid hsl(var(--line))",
           borderRadius: "var(--radius)",
@@ -51,6 +51,22 @@ export default function Tips() {
           </p>
         </div>
 
+        {/* Disclaimer */}
+        <div
+          style={{
+            background: "hsl(var(--sage) / 0.12)",
+            border: "1px solid hsl(var(--sage) / 0.35)",
+            borderRadius: 10,
+            padding: "10px 14px",
+            fontSize: 12.5,
+            color: "hsl(var(--ink-soft))",
+            lineHeight: 1.55,
+            fontFamily: FF,
+          }}
+        >
+          {DISCLAIMER}
+        </div>
+
         {/* Category filter pills */}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           <FilterPill label="All" active={activeCategory === "all"} onClick={() => setActiveCategory("all")} />
@@ -59,15 +75,13 @@ export default function Tips() {
           ))}
         </div>
 
-        {/* Sections */}
+        {/* Tips content */}
         {activeCategory === "all" ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 28 }}>
             {TIP_CATEGORIES.map((cat) => {
               const catTips = TIPS.filter((t) => t.category === cat.id);
               if (catTips.length === 0) return null;
-              return (
-                <Section key={cat.id} label={cat.label} tips={catTips} />
-              );
+              return <Section key={cat.id} label={cat.label} tips={catTips} />;
             })}
           </div>
         ) : (
@@ -84,10 +98,11 @@ export default function Tips() {
         {/* Source credit */}
         {SOURCE_URL && (
           <p style={{ margin: 0, fontSize: 11.5, color: "hsl(var(--ink-soft))", fontFamily: FF }}>
-            {SOURCE_LABEL}:{" "}
+            Inspired by{" "}
             <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" style={{ color: "hsl(var(--clay))", textDecoration: "underline" }}>
-              {SOURCE_URL}
+              this Reddit thread
             </a>
+            , paraphrased by ADHDrive users.
           </p>
         )}
       </div>
@@ -96,27 +111,21 @@ export default function Tips() {
   );
 }
 
-// ─── Section ──────────────────────────────────────────────────────────────────
-
 function Section({ label, tips }: { label: string; tips: { id: string; text: string }[] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: "hsl(var(--clay))", flexShrink: 0, display: "inline-block" }} />
-        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "hsl(var(--clay))", fontFamily: "Verdana, Geneva, sans-serif" }}>
+        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: "0.07em", textTransform: "uppercase", color: "hsl(var(--clay))", fontFamily: FF }}>
           {label}
         </p>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {tips.map((tip) => (
-          <TipCard key={tip.id} text={tip.text} />
-        ))}
+        {tips.map((tip) => <TipCard key={tip.id} text={tip.text} />)}
       </div>
     </div>
   );
 }
-
-// ─── TipCard ──────────────────────────────────────────────────────────────────
 
 function TipCard({ text }: { text: string }) {
   return (
@@ -129,15 +138,13 @@ function TipCard({ text }: { text: string }) {
         fontSize: 14,
         color: "hsl(var(--ink))",
         lineHeight: 1.6,
-        fontFamily: "Verdana, Geneva, sans-serif",
+        fontFamily: FF,
       }}
     >
       {text}
     </div>
   );
 }
-
-// ─── FilterPill ───────────────────────────────────────────────────────────────
 
 function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
@@ -150,7 +157,7 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
         borderColor: active ? "hsl(var(--clay))" : "hsl(var(--line))",
         borderRadius: 999,
         padding: "6px 14px",
-        fontFamily: "Verdana, Geneva, sans-serif",
+        fontFamily: FF,
         fontSize: 12.5,
         fontWeight: 600,
         cursor: "pointer",
@@ -162,11 +169,9 @@ function FilterPill({ label, active, onClick }: { label: string; active: boolean
   );
 }
 
-// ─── EmptyState ───────────────────────────────────────────────────────────────
-
 function EmptyState() {
   return (
-    <div style={{ border: "1.5px dashed hsl(var(--line))", borderRadius: 14, padding: "32px 20px", textAlign: "center", color: "hsl(var(--ink-soft))", fontFamily: "Verdana, Geneva, sans-serif", fontSize: 13.5 }}>
+    <div style={{ border: "1.5px dashed hsl(var(--line))", borderRadius: 14, padding: "32px 20px", textAlign: "center", color: "hsl(var(--ink-soft))", fontFamily: FF, fontSize: 13.5 }}>
       No tips here yet — check back soon.
     </div>
   );

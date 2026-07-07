@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Palette, Check } from "lucide-react";
+import { Palette, Check, Lightbulb } from "lucide-react";
 import { useTheme, type Theme } from "../hooks/useTheme";
 import Footer from "../components/Footer";
 
@@ -32,6 +32,59 @@ function logRoutingChoice(choice: string) {
     log.push({ choice, timestamp: Date.now() });
     localStorage.setItem(ROUTING_LOG_KEY, JSON.stringify(log.slice(-200)));
   } catch (e) {}
+}
+
+function TipsButton({ onClick }: { onClick: () => void }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      aria-label="ADHD tips"
+      style={{
+        position: "absolute",
+        top: 16,
+        left: 16,
+        zIndex: 50,
+        display: "flex",
+        alignItems: "center",
+        gap: hovered ? 7 : 0,
+        padding: "7px 10px",
+        borderRadius: 999,
+        border: "1.5px solid hsl(var(--line))",
+        background: hovered ? "hsl(var(--clay-soft))" : "hsl(var(--paper-raised))",
+        cursor: "pointer",
+        overflow: "hidden",
+        transition: "background 0.2s ease, border-color 0.2s ease, gap 0.2s ease",
+        borderColor: hovered ? "hsl(var(--clay))" : "hsl(var(--line))",
+      }}
+    >
+      <Lightbulb
+        size={15}
+        style={{
+          color: hovered ? "hsl(var(--clay))" : "hsl(var(--ink-soft))",
+          transition: "color 0.2s ease",
+          flexShrink: 0,
+        }}
+      />
+      <span
+        style={{
+          fontSize: 12.5,
+          fontWeight: 600,
+          color: "hsl(var(--clay))",
+          fontFamily: "Verdana, Geneva, sans-serif",
+          whiteSpace: "nowrap",
+          maxWidth: hovered ? 90 : 0,
+          opacity: hovered ? 1 : 0,
+          overflow: "hidden",
+          transition: "max-width 0.22s ease, opacity 0.18s ease",
+        }}
+      >
+        ADHD tips
+      </span>
+    </button>
+  );
 }
 
 export default function Home() {
@@ -71,6 +124,9 @@ export default function Home() {
 
   return (
     <div className="min-h-[100dvh] w-full flex flex-col items-center justify-center bg-paper relative overflow-hidden px-4">
+
+      {/* Tips shortcut — top-left corner */}
+      <TipsButton onClick={() => setLocation("/tips")} />
 
       {/* Theme dropdown — top-right corner */}
       <div ref={dropdownRef} style={{ position: "absolute", top: 16, right: 16, zIndex: 50 }}>

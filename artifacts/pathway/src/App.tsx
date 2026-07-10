@@ -15,6 +15,7 @@ import Tips from "./pages/Tips";
 import { useTheme } from "./hooks/useTheme";
 import { FocusTimerProvider } from "./hooks/useFocusTimer";
 import FloatingTimerBar from "./components/FloatingTimerBar";
+import PinSaveModal from "./components/PinSaveModal";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ function App() {
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <Router />
             <FloatingTimerBar />
+            <PinSaveModal />
           </WouterRouter>
         </FocusTimerProvider>
         <Toaster />

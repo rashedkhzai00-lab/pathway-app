@@ -96,18 +96,27 @@ export default function PinSaveModal() {
       <button
         onClick={() => setMode("menu")}
         style={{
-          background: "none",
-          border: "none",
+          position: "fixed",
+          bottom: 20,
+          left: 20,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "6px 12px",
+          borderRadius: 999,
+          border: "1.5px solid hsl(var(--line))",
+          background: "hsl(var(--paper-raised))",
           cursor: "pointer",
-          fontSize: 11.5,
-          color: "hsl(var(--ink-soft))",
-          fontFamily: FF,
-          textDecoration: "underline",
-          textUnderlineOffset: 3,
-          padding: 0,
+          zIndex: 40,
+          boxShadow: "var(--shadow-warm-1)",
         }}
       >
-        {hasSavedPin ? "Manage saved backup" : "Save my data with a PIN (optional)"}
+        <span style={{ fontSize: 12.5, fontWeight: 700, color: "hsl(var(--clay))", fontFamily: FF, letterSpacing: "0.04em" }}>
+          PIN
+        </span>
+        {hasSavedPin && (
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "hsl(var(--sage))", display: "inline-block" }} />
+        )}
       </button>
     );
   }

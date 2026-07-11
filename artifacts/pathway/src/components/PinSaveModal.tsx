@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { checkPinAvailable, createPinSave, restorePinSave, deletePinSave } from "../utils/pinSync";
 
 type Mode = "closed" | "menu" | "create" | "restore" | "success";
@@ -6,7 +6,6 @@ type Mode = "closed" | "menu" | "create" | "restore" | "success";
 const FF = "Verdana, Geneva, sans-serif";
 
 export default function PinSaveModal() {
-  const [backendAvailable, setBackendAvailable] = useState(true);
   const [mode, setMode] = useState<Mode>("closed");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -15,22 +14,6 @@ export default function PinSaveModal() {
   const [hasSavedPin, setHasSavedPin] = useState(
     () => !!localStorage.getItem("adhdrive_has_pin"),
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/healthz")
-      .then((res) => {
-        if (!res.ok) throw new Error("no backend");
-        const ct = res.headers.get("content-type") ?? "";
-        if (!ct.includes("application/json")) throw new Error("no backend");
-        return res.json() as Promise<unknown>;
-      })
-      .then(() => {})
-      .catch(() => {
-        if (!cancelled) setBackendAvailable(false);
-      });
-    return () => { cancelled = true; };
-  }, []);
 
   function reset() {
     setPin("");
@@ -113,8 +96,6 @@ export default function PinSaveModal() {
       setLoading(false);
     }
   }
-
-  if (!backendAvailable) return null;
 
   if (mode === "closed") {
     return (

@@ -35,19 +35,19 @@ function hashPin(pin: string) {
 }
 
 function isValidPin(pin: unknown): pin is string {
-  return typeof pin === "string" && (/^\d{4}$/.test(pin) || /^\d{6}$/.test(pin));
+  return typeof pin === "string" && /^\d{4}$/.test(pin);
 }
 
 router.post("/pin/check", async (req, res) => {
   const { pin } = req.body as { pin?: unknown };
-  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be 4 or 6 digits." });
+  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be exactly 4 digits." });
   const [row] = await db.select().from(pinSavesTable).where(eq(pinSavesTable.pinHash, hashPin(pin)));
   res.json({ available: !row });
 });
 
 router.post("/pin/create", async (req, res) => {
   const { pin, data } = req.body as { pin?: unknown; data?: unknown };
-  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be 4 or 6 digits." });
+  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be exactly 4 digits." });
   const hash = hashPin(pin);
   const [existing] = await db.select().from(pinSavesTable).where(eq(pinSavesTable.pinHash, hash));
   if (existing) return void res.status(409).json({ error: "That PIN is already taken. Please choose another." });
@@ -57,7 +57,7 @@ router.post("/pin/create", async (req, res) => {
 
 router.post("/pin/save", rateLimit, async (req, res) => {
   const { pin, data } = req.body as { pin?: unknown; data?: unknown };
-  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be 4 or 6 digits." });
+  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be exactly 4 digits." });
   const hash = hashPin(pin);
   const [existing] = await db.select().from(pinSavesTable).where(eq(pinSavesTable.pinHash, hash));
   if (!existing) return void res.status(404).json({ error: "No save found for that PIN." });
@@ -67,7 +67,7 @@ router.post("/pin/save", rateLimit, async (req, res) => {
 
 router.post("/pin/restore", rateLimit, async (req, res) => {
   const { pin } = req.body as { pin?: unknown };
-  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be 4 or 6 digits." });
+  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be exactly 4 digits." });
   const [row] = await db.select().from(pinSavesTable).where(eq(pinSavesTable.pinHash, hashPin(pin)));
   if (!row) return void res.status(404).json({ error: "No save found for that PIN." });
   res.json({ data: JSON.parse(row.data) as unknown, updatedAt: row.updatedAt });
@@ -75,7 +75,7 @@ router.post("/pin/restore", rateLimit, async (req, res) => {
 
 router.post("/pin/delete", rateLimit, async (req, res) => {
   const { pin } = req.body as { pin?: unknown };
-  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be 4 or 6 digits." });
+  if (!isValidPin(pin)) return void res.status(400).json({ error: "PIN must be exactly 4 digits." });
   const hash = hashPin(pin);
   const [existing] = await db.select().from(pinSavesTable).where(eq(pinSavesTable.pinHash, hash));
   if (!existing) return void res.status(404).json({ error: "No save found for that PIN." });

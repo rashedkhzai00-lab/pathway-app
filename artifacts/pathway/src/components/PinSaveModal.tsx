@@ -6,7 +6,7 @@ type Mode = "closed" | "menu" | "create" | "restore" | "success";
 const FF = "Verdana, Geneva, sans-serif";
 
 export default function PinSaveModal() {
-  const [backendAvailable, setBackendAvailable] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(true);
   const [mode, setMode] = useState<Mode>("closed");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -20,15 +20,15 @@ export default function PinSaveModal() {
     let cancelled = false;
     fetch("/api/healthz")
       .then((res) => {
-        if (!res.ok) return null;
+        if (!res.ok) throw new Error("no backend");
         const ct = res.headers.get("content-type") ?? "";
-        if (!ct.includes("application/json")) return null;
+        if (!ct.includes("application/json")) throw new Error("no backend");
         return res.json() as Promise<unknown>;
       })
-      .then((body) => {
-        if (!cancelled && body) setBackendAvailable(true);
-      })
-      .catch(() => {});
+      .then(() => {})
+      .catch(() => {
+        if (!cancelled) setBackendAvailable(false);
+      });
     return () => { cancelled = true; };
   }, []);
 
